@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+  <title>HPCL Journey Risk Management API Documentation</title>
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons@2.44.0/icons-sprite.svg" rel="stylesheet"/>
+  <style>
+    .curl-command {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      border-left: 4px solid #0984e3;
+    }
+    .response-json {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    .method-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+    .get { background: #d1ecf1; color: #0c5460; }
+    .post { background: #d4edda; color: #155724; }
+    .put { background: #fff3cd; color: #856404; }
+    .delete { background: #f8d7da; color: #721c24; }
+    .nav-pills .nav-link.active { background-color: #0984e3; }
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .code-container {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Navbar -->
+    <header class="navbar navbar-expand-md navbar-light d-print-none">
+      <div class="container-xl">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+          <img src="https://via.placeholder.com/32x32/0984e3/ffffff?text=H" width="32" height="32" class="navbar-brand-image">
+          HPCL Journey Risk Management API
+        </h1>
+      </div>
+    </header>
+
+    <!-- Page wrapper -->
+    <div class="page-wrapper">
+      <!-- Page header -->
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <h2 class="page-title">API Documentation & Testing Guide</h2>
+              <div class="text-muted">Complete API reference for HPCL Journey Risk Management System v2.0</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+              <div class="btn-list">
+                <span class="badge bg-blue">v2.0.0</span>
+                <span class="badge bg-green">Enhanced</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page body -->
+      <div class="page-body">
+        <div class="container-xl">
+          <div class="row g-4">
+            <!-- Sidebar -->
+            <div class="col-3">
+              <div class="card">
+                <div class="card-body">
+                  <h4>API Endpoints</h4>
+                  <div class="nav nav-pills nav-vertical" role="tablist">
+                    <a class="nav-link active" data-bs-toggle="pill" href="#overview">
+                      <svg class="icon me-2"><use xlink:href="#tabler-info-circle"></use></svg>
+                      Overview
+                    </a>
+                    <a class="nav-link" data-bs-toggle="pill" href="#auth">
+                      <svg class="icon me-2"><use xlink:href="#tabler-lock"></use></svg>
+                      Authentication
+                    </a>
+                    <a class="nav-link" data-bs-toggle="pill" href="#routes">
+                      <svg class="icon me-2"><use xlink:href="#tabler-route"></use></svg>
+                      Routes Management
+                    </a>
+                    <a class="nav-link" data-bs-toggle="pill" href="#data-collection">
+                      <svg class="icon me-2"><use xlink:href="#tabler-database"></use></svg>
+                      Data Collection
+                    </a>
+                    <a class="nav-link" data-bs-toggle="pill" href="#risk-analysis">
+                      <svg class="icon me-2"><use xlink:href="#tabler-alert-triangle"></use></svg>
+                      Risk Analysis
+                    </a>
+                    <a class="nav-link" data-bs-toggle="pill" href="#visibility">
+                      <svg class="icon me-2"><use xlink:href="#tabler-eye"></use></svg>
+                      Visibility Analysis
+                    </a>
+                    <a class="nav-link" data-bs-toggle="pill" href="#dashboard">
+                      <svg class="icon me-2"><use xlink:href="#tabler-dashboard"></use></svg>
+                      Dashboard
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main content -->
+            <div class="col-9">
+              <div class="tab-content">
+                <!-- Overview -->
+                <div class="tab-pane fade show active" id="overview">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">System Overview</h3>
+                    </div>
+                    <div class="card-body">
+                      <div class="row g-3">
+                        <div class="col-md-6">
+                          <div class="card card-sm">
+                            <div class="card-body">
+                              <div class="d-flex align-items-center">
+                                <span class="bg-blue text-white avatar">
+                                  <svg class="icon"><use xlink:href="#tabler-server"></use></svg>
+                                </span>
+                                <div class="ms-3">
+                                  <div class="text-muted">Base URL</div>
+                                  <div class="fw-bold">http://localhost:3000</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="card card-sm">
+                            <div class="card-body">
+                              <div class="d-flex align-items-center">
+                                <span class="bg-green text-white avatar">
+                                  <svg class="icon"><use xlink:href="#tabler-check"></use></svg>
+                                </span>
+                                <div class="ms-3">
+                                  <div class="text-muted">Status</div>
+                                  <div class="fw-bold">Active</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <h4 class="mt-4">Quick Start</h4>
+                      <p>The HPCL Journey Risk Management System provides comprehensive APIs for route analysis, risk assessment, and safety management. Here's how to get started:</p>
+                      
+                      <ol>
+                        <li><strong>Register/Login:</strong> Create an account and get JWT token</li>
+                        <li><strong>Upload Route:</strong> Upload GPS route data or create manually</li>
+                        <li><strong>Collect Data:</strong> Gather comprehensive route data</li>
+                        <li><strong>Analyze Risk:</strong> Get detailed risk assessment</li>
+                        <li><strong>View Results:</strong> Access dashboard and reports</li>
+                      </ol>
+
+                      <div class="alert alert-info">
+                        <h4 class="alert-title">Health Check</h4>
+                        <p>Test if the API is running:</p>
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/health</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Authentication -->
+                <div class="tab-pane fade" id="auth">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">Authentication Endpoints</h3>
+                    </div>
+                    <div class="card-body">
+                      <!-- Register -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge post">POST</span> /api/auth/register</h4>
+                        <p>Create a new user account</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@hpcl.com",
+    "password": "Test123!",
+    "role": "user",
+    "profile": {
+      "firstName": "Test",
+      "lastName": "User",
+      "department": "Logistics",
+      "employeeId": "EMP001"
+    }
+  }'</div>
+                        </div>
+
+                        <div class="response-json">{
+  "success": true,
+  "message": "User registered successfully",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "user_id",
+    "username": "testuser",
+    "email": "test@hpcl.com",
+    "role": "user"
+  }
+}</div>
+                      </div>
+
+                      <!-- Login -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge post">POST</span> /api/auth/login</h4>
+                        <p>Login with existing credentials</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@hpcl.com",
+    "password": "Test123!"
+  }'</div>
+                        </div>
+
+                        <div class="response-json">{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "user_id",
+    "username": "testuser",
+    "email": "test@hpcl.com",
+    "role": "user",
+    "lastLogin": "2024-12-19T10:30:00.000Z"
+  }
+}</div>
+                      </div>
+
+                      <!-- Get Profile -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/auth/profile</h4>
+                        <p>Get current user profile (requires authentication)</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/auth/profile \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+
+                      <!-- Logout -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge post">POST</span> /api/auth/logout</h4>
+                        <p>Logout current user</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X POST http://localhost:3000/api/auth/logout \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Routes Management -->
+                <div class="tab-pane fade" id="routes">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">Routes Management</h3>
+                    </div>
+                    <div class="card-body">
+                      <!-- Create Manual Route -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge post">POST</span> /api/routes</h4>
+                        <p>Create a route manually with coordinates</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X POST http://localhost:3000/api/routes \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "routeName": "Delhi to Mumbai Highway",
+    "fromAddress": "India Gate, New Delhi",
+    "fromCode": "DEL001",
+    "fromName": "Delhi",
+    "fromCoordinates": {
+      "latitude": 28.7041,
+      "longitude": 77.1025
+    },
+    "toAddress": "Gateway of India, Mumbai",
+    "toCode": "MUM001", 
+    "toName": "Mumbai",
+    "toCoordinates": {
+      "latitude": 18.9220,
+      "longitude": 72.8347
+    },
+    "terrain": "mixed",
+    "majorHighways": ["NH48", "NH44"]
+  }'</div>
+                        </div>
+                      </div>
+
+                      <!-- Upload GPS Route -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge post">POST</span> /api/routes/upload-gps-route</h4>
+                        <p>Upload GPS tracking data from CSV file</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X POST http://localhost:3000/api/routes/upload-gps-route \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -F "gpsFile=@gps_route.csv" \
+  -F "fromCode=DEL001" \
+  -F "fromName=Delhi Depot" \
+  -F "toCode=MUM001" \
+  -F "toName=Mumbai Terminal" \
+  -F "routeName=Delhi-Mumbai GPS Route" \
+  -F "terrain=mixed"</div>
+                        </div>
+
+                        <div class="alert alert-info">
+                          <h5>GPS CSV Format:</h5>
+                          <p>The CSV file should contain GPS coordinates in this format:</p>
+                          <pre>28.7041,77.1025
+28.7045,77.1030
+28.7050,77.1035</pre>
+                          <p>Each line: <code>latitude,longitude</code></p>
+                        </div>
+                      </div>
+
+                      <!-- Get All Routes -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/routes</h4>
+                        <p>Get all routes for current user with pagination</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET "http://localhost:3000/api/routes?page=1&limit=10&search=delhi&riskLevel=HIGH" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+
+                      <!-- Get Single Route -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/routes/:id</h4>
+                        <p>Get detailed route information including GPS points</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/routes/ROUTE_ID \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+
+                      <!-- Update Route -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge put">PUT</span> /api/routes/:id</h4>
+                        <p>Update route details</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X PUT http://localhost:3000/api/routes/ROUTE_ID \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "routeName": "Updated Route Name",
+    "terrain": "hilly",
+    "majorHighways": ["NH1", "NH2"]
+  }'</div>
+                        </div>
+                      </div>
+
+                      <!-- Delete Route -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge delete">DELETE</span> /api/routes/:id</h4>
+                        <p>Soft delete a route</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X DELETE http://localhost:3000/api/routes/ROUTE_ID \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Data Collection -->
+                <div class="tab-pane fade" id="data-collection">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">Comprehensive Data Collection</h3>
+                    </div>
+                    <div class="card-body">
+                      <!-- Collect All Data -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge post">POST</span> /api/routes/:id/collect-all-data</h4>
+                        <p>Collect comprehensive data for a route (emergency services, weather, traffic, etc.)</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X POST http://localhost:3000/api/routes/ROUTE_ID/collect-all-data \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+
+                        <div class="response-json">{
+  "success": true,
+  "message": "Comprehensive data collection completed",
+  "routeInfo": {
+    "routeId": "RT1234567890",
+    "routeName": "Delhi to Mumbai Highway",
+    "totalDistance": 1400.5,
+    "gpsPoints": 150
+  },
+  "collectionResults": {
+    "emergencyServices": { "total": 45, "hospitals": 12, "police": 8 },
+    "weatherData": { "total": 25, "avgRisk": 4.2 },
+    "trafficData": { "total": 30, "congestionAreas": 5 },
+    "accidentAreas": { "total": 8, "highRisk": 2 },
+    "roadConditions": { "total": 35, "poorConditions": 3 }
+  }
+}</div>
+                      </div>
+
+                      <!-- Get Emergency Services -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/routes/:id/emergency-services</h4>
+                        <p>Get emergency services along the route</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/routes/ROUTE_ID/emergency-services \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+
+                      <!-- Get Weather Data -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/routes/:id/weather-data</h4>
+                        <p>Get weather conditions for the route</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/routes/ROUTE_ID/weather-data \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+
+                      <!-- Get Traffic Data -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/routes/:id/traffic-data</h4>
+                        <p>Get traffic information for the route</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/routes/ROUTE_ID/traffic-data \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+
+                      <!-- Get Accident Areas -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/routes/:id/accident-areas</h4>
+                        <p>Get accident-prone areas along the route</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/routes/ROUTE_ID/accident-areas \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+
+                      <!-- Get Road Conditions -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/routes/:id/road-conditions</h4>
+                        <p>Get road condition assessment</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/routes/ROUTE_ID/road-conditions \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+
+                      <!-- Comprehensive Analysis -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/routes/:id/comprehensive-analysis</h4>
+                        <p>Get complete route analysis with all data points</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/routes/ROUTE_ID/comprehensive-analysis \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Risk Analysis -->
+                <div class="tab-pane fade" id="risk-analysis">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">Risk Analysis & Calculation</h3>
+                    </div>
+                    <div class="card-body">
+                      <!-- Calculate Risk -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/risk/calculate/:routeId</h4>
+                        <p>Calculate comprehensive risk score for a route</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/risk/calculate/ROUTE_ID \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+
+                        <div class="response-json">{
+  "success": true,
+  "data": {
+    "routeId": "RT1234567890",
+    "riskScore": {
+      "roadConditions": 6.5,
+      "accidentProne": 4.2,
+      "sharpTurns": 3.8,
+      "blindSpots": 4.1,
+      "trafficDensity": 5.5,
+      "weatherConditions": 4.5,
+      "emergencyServices": 3.2,
+      "totalWeightedScore": 4.8,
+      "riskGrade": "C",
+      "calculatedAt": "2024-12-19T10:30:00.000Z"
+    },
+    "explanation": {
+      "grade": "C",
+      "score": 4.8,
+      "explanation": "Medium Risk - Route requires normal caution",
+      "recommendations": [
+        "Monitor weather and traffic conditions",
+        "Ensure emergency kit is complete",
+        "Plan rest stops at regular intervals"
+      ]
+    }
+  }
+}</div>
+                      </div>
+
+                      <!-- Risk History -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge get">GET</span> /api/risk/history/:routeId</h4>
+                        <p>Get risk calculation history for a route</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X GET http://localhost:3000/api/risk/history/ROUTE_ID \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+
+                      <!-- Batch Calculate -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge post">POST</span> /api/risk/batch-calculate</h4>
+                        <p>Calculate risk for multiple routes</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X POST http://localhost:3000/api/risk/batch-calculate \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "routeIds": ["ROUTE_ID_1", "ROUTE_ID_2", "ROUTE_ID_3"]
+  }'</div>
+                        </div>
+                      </div>
+
+                      <!-- Recalculate Route Risk -->
+                      <div class="mb-4">
+                        <h4><span class="method-badge post">POST</span> /api/routes/:id/recalculate-risk</h4>
+                        <p>Recalculate risk score for a specific route</p>
+                        
+                        <div class="code-container">
+                          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                          <div class="curl-command">curl -X POST http://localhost:3000/api/routes/ROUTE_ID/recalculate-risk \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              <!-- Complete Visibility Analysis Section -->
+<div class="tab-pane fade" id="visibility">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Visibility Analysis (Sharp Turns & Blind Spots)</h3>
+    </div>
+    <div class="card-body">
+      
+      <!-- PRIMARY VISIBILITY ANALYSIS -->
+      <div class="mb-4">
+        <h4><span class="method-badge post">POST</span> /api/routes/:id/analyze-visibility</h4>
+        <p>Perform comprehensive visibility analysis using REAL calculations with Google APIs</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X POST http://localhost:3000/api/routes/ROUTE_ID/analyze-visibility \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+
+        <div class="response-json">{
+  "success": true,
+  "message": "ENHANCED visibility analysis completed successfully",
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1234567890",
+      "routeName": "Delhi to Mumbai Highway",
+      "totalDistance": 1400.5,
+      "gpsPoints": 150
+    },
+    "sharpTurns": {
+      "totalCount": 12,
+      "criticalTurns": 3,
+      "avgRiskScore": 5.2,
+      "severityBreakdown": {
+        "hairpin": 2,
+        "sharp": 4,
+        "moderate": 6
+      }
+    },
+    "blindSpots": {
+      "totalCount": 8,
+      "criticalSpots": 2,
+      "avgRiskScore": 4.8,
+      "analysisMethod": "REAL_GOOGLE_API",
+      "improvements": {
+        "elevationData": "Google Elevation API",
+        "sightLineMethod": "Ray tracing with earth curvature",
+        "obstructionDetection": "Google Places API + shadow zones"
+      }
+    },
+    "summary": {
+      "overallRiskLevel": "MEDIUM",
+      "totalCriticalPoints": 5,
+      "recommendations": [
+        "Reduce speed in 5 critical visibility areas",
+        "Use convoy travel through sharp turn sections",
+        "Install additional warning equipment"
+      ]
+    },
+    "enhancementInfo": {
+      "blindSpotMethod": "REAL_GOOGLE_API",
+      "apiIntegration": {
+        "googleElevationAPI": true,
+        "googlePlacesAPI": true,
+        "realTimeCalculations": true
+      }
+    }
+  }
+}</div>
+      </div>
+
+      <!-- SHARP TURNS ANALYSIS -->
+      <div class="mb-4">
+        <h4><span class="method-badge post">POST</span> /api/visibility/routes/:routeId/analyze-sharp-turns</h4>
+        <p>Analyze sharp turns specifically with geometric calculations</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X POST http://localhost:3000/api/visibility/routes/ROUTE_ID/analyze-sharp-turns \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+
+        <div class="response-json">{
+  "success": true,
+  "message": "Sharp turns analysis completed successfully",
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1234567890",
+      "routeName": "Delhi to Mumbai Highway",
+      "totalDistance": 1400.5,
+      "gpsPoints": 150
+    },
+    "sharpTurns": {
+      "turns": [
+        {
+          "_id": "turn_id_1",
+          "coordinates": {
+            "latitude": 28.7041,
+            "longitude": 77.1025
+          },
+          "distanceFromStart": 45.2,
+          "turnAngle": 85.6,
+          "turnDirection": "right",
+          "turnRadius": 75,
+          "recommendedSpeed": 25,
+          "riskScore": 7.2,
+          "severity": "sharp",
+          "streetViewLink": "https://www.google.com/maps/@28.7041,77.1025,3a,75y,90h,90t",
+          "mapsLink": "https://www.google.com/maps/place/28.7041,77.1025"
+        }
+      ],
+      "totalCount": 12,
+      "avgRiskScore": 5.2,
+      "criticalTurns": 3,
+      "severityBreakdown": {
+        "hairpin": 2,
+        "sharp": 4,
+        "moderate": 6,
+        "gentle": 0
+      }
+    },
+    "analysisDate": "2024-12-19T10:30:00.000Z"
+  }
+}</div>
+      </div>
+
+      <!-- GET SHARP TURNS -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/routes/:id/sharp-turns</h4>
+        <p>Get detailed sharp turns analysis with optional image data</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET "http://localhost:3000/api/routes/ROUTE_ID/sharp-turns?includeImages=true&riskLevel=high" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+      </div>
+
+      <!-- GET BLIND SPOTS -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/routes/:id/blind-spots</h4>
+        <p>Get detailed blind spots analysis</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET "http://localhost:3000/api/routes/ROUTE_ID/blind-spots?includeImages=true&spotType=crest" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+      </div>
+
+      <!-- COMBINED VISIBILITY ANALYSIS -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/visibility/routes/:routeId/visibility-analysis</h4>
+        <p>Get combined sharp turns and blind spots analysis</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET http://localhost:3000/api/visibility/routes/ROUTE_ID/visibility-analysis \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+
+        <div class="response-json">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1234567890",
+      "routeName": "Delhi to Mumbai Highway",
+      "totalDistance": 1400.5,
+      "terrain": "mixed"
+    },
+    "overallAssessment": {
+      "averageRiskScore": 5.1,
+      "maxRiskScore": 8.5,
+      "totalRiskPoints": 20,
+      "criticalPoints": 5,
+      "overallRiskLevel": "MEDIUM"
+    },
+    "breakdown": {
+      "sharpTurns": {
+        "total": 12,
+        "critical": 3,
+        "avgRiskScore": 5.2
+      },
+      "blindSpots": {
+        "total": 8,
+        "critical": 2,
+        "avgRiskScore": 4.8,
+        "analysisMethod": "REAL_GOOGLE_API"
+      }
+    },
+    "enhancementStatus": {
+      "realCalculationsUsed": true,
+      "apiIntegrations": {
+        "elevationAPI": "Google Elevation API",
+        "placesAPI": "Google Places API",
+        "streetViewAPI": "Google Street View API"
+      },
+      "fallbackUsed": false
+    },
+    "riskPoints": [
+      {
+        "type": "sharp_turn",
+        "id": "turn_id_1",
+        "coordinates": { "latitude": 28.7041, "longitude": 77.1025 },
+        "distanceFromStart": 45.2,
+        "riskScore": 7.2,
+        "details": {
+          "turnAngle": 85.6,
+          "severity": "sharp",
+          "recommendedSpeed": 25
+        }
+      },
+      {
+        "type": "blind_spot",
+        "id": "spot_id_1",
+        "coordinates": { "latitude": 28.7055, "longitude": 77.1035 },
+        "distanceFromStart": 52.1,
+        "riskScore": 6.8,
+        "details": {
+          "spotType": "crest",
+          "visibilityDistance": 85,
+          "severityLevel": "significant"
+        }
+      }
+    ],
+    "routeRecommendations": [
+      {
+        "priority": "CRITICAL",
+        "category": "immediate_action",
+        "title": "5 Critical Visibility Points Detected",
+        "actions": [
+          "Reduce speed to 30-40 km/h in identified areas",
+          "Use convoy travel with lead vehicle communication",
+          "Consider alternative route planning"
+        ]
+      }
+    ],
+    "analysisDate": "2024-12-19T10:30:00.000Z"
+  }
+}</div>
+      </div>
+
+      <!-- GENERATE STREET VIEW IMAGES -->
+      <div class="mb-4">
+        <h4><span class="method-badge post">POST</span> /api/visibility/routes/:routeId/generate-street-view-images</h4>
+        <p>Generate street view images for all risk points using Google Street View API</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X POST http://localhost:3000/api/visibility/routes/ROUTE_ID/generate-street-view-images \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "forceRegenerate": true
+  }'</div>
+        </div>
+
+        <div class="response-json">{
+  "success": true,
+  "message": "Street view image generation completed",
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1234567890",
+      "routeName": "Delhi to Mumbai Highway"
+    },
+    "results": {
+      "sharpTurns": {
+        "processed": 12,
+        "updated": 10,
+        "errors": 2
+      },
+      "blindSpots": {
+        "processed": 8,
+        "updated": 7,
+        "errors": 1
+      }
+    },
+    "summary": {
+      "totalProcessed": 20,
+      "totalUpdated": 17,
+      "totalErrors": 3
+    }
+  }
+}</div>
+      </div>
+
+      <!-- GET SPECIFIC SHARP TURN DETAILS -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/visibility/sharp-turns/:turnId</h4>
+        <p>Get detailed information about a specific sharp turn</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET http://localhost:3000/api/visibility/sharp-turns/TURN_ID \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+      </div>
+
+      <!-- GET SPECIFIC BLIND SPOT DETAILS -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/visibility/blind-spots/:spotId</h4>
+        <p>Get detailed information about a specific blind spot</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET http://localhost:3000/api/visibility/blind-spots/SPOT_ID \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+      </div>
+
+      <!-- GET VISIBILITY STATISTICS -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/visibility/routes/:routeId/visibility-stats</h4>
+        <p>Get detailed visibility statistics and metrics</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET http://localhost:3000/api/visibility/routes/ROUTE_ID/visibility-stats \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+
+        <div class="response-json">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1234567890",
+      "routeName": "Delhi to Mumbai Highway",
+      "totalDistance": 1400.5
+    },
+    "sharpTurns": {
+      "total": 12,
+      "averageRiskScore": 5.2,
+      "maxRiskScore": 8.5,
+      "critical": 3,
+      "high": 4,
+      "severityBreakdown": {
+        "hairpin": 2,
+        "sharp": 4,
+        "moderate": 6,
+        "gentle": 0
+      },
+      "density": 0.086
+    },
+    "blindSpots": {
+      "total": 8,
+      "averageRiskScore": 4.8,
+      "maxRiskScore": 7.2,
+      "critical": 2,
+      "typeBreakdown": {
+        "crest": 4,
+        "curve": 2,
+        "obstruction": 2,
+        "intersection": 0
+      },
+      "averageVisibilityDistance": 125.5,
+      "poorVisibilitySpots": 3,
+      "density": 0.057
+    },
+    "combined": {
+      "totalRiskPoints": 20,
+      "criticalPoints": 5,
+      "overallRiskDensity": 0.143
+    }
+  }
+}</div>
+      </div>
+
+      <!-- DELETE VISIBILITY DATA -->
+      <div class="mb-4">
+        <h4><span class="method-badge delete">DELETE</span> /api/visibility/routes/:routeId/visibility-data</h4>
+        <p>Delete all visibility data (sharp turns and blind spots) for a route</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X DELETE http://localhost:3000/api/visibility/routes/ROUTE_ID/visibility-data \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+
+        <div class="response-json">{
+  "success": true,
+  "message": "Visibility data deleted successfully",
+  "data": {
+    "deletedSharpTurns": 12,
+    "deletedBlindSpots": 8
+  }
+}</div>
+      </div>
+
+      <!-- ADVANCED FILTERS -->
+      <div class="alert alert-info">
+        <h5>Query Parameters for GET Requests:</h5>
+        <ul class="mb-0">
+          <li><code>includeImages=true/false</code> - Include street view and map images</li>
+          <li><code>riskLevel=low/medium/high/critical</code> - Filter by risk level</li>
+          <li><code>spotType=crest/curve/obstruction/intersection</code> - Filter blind spots by type</li>
+          <li><code>turnSeverity=gentle/moderate/sharp/hairpin</code> - Filter turns by severity</li>
+        </ul>
+      </div>
+
+      <!-- REAL CALCULATIONS INFO -->
+      <div class="alert alert-success">
+        <h5>🔬 Real Engineering Calculations:</h5>
+        <p>The visibility analysis uses:</p>
+        <ul class="mb-0">
+          <li><strong>Google Elevation API:</strong> Real terrain elevation data</li>
+          <li><strong>Ray Tracing Algorithm:</strong> Line-of-sight calculations with earth curvature</li>
+          <li><strong>AASHTO Standards:</strong> Engineering formulas for sight distance</li>
+          <li><strong>Google Places API:</strong> Real obstruction detection</li>
+          <li><strong>Geometric Analysis:</strong> Circle fitting for curve radius calculation</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard Section -->
+<div class="tab-pane fade" id="dashboard">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Dashboard & Analytics</h3>
+    </div>
+    <div class="card-body">
+      
+      <!-- Dashboard Overview -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/dashboard/overview</h4>
+        <p>Get dashboard overview with summary statistics</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET http://localhost:3000/api/dashboard/overview \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+
+        <div class="response-json">{
+  "success": true,
+  "data": {
+    "totalRoutes": 25,
+    "riskDistribution": {
+      "LOW": 8,
+      "MEDIUM": 12,
+      "HIGH": 4,
+      "CRITICAL": 1
+    },
+    "recentRoutes": [
+      {
+        "routeId": "RT1234567890",
+        "routeName": "Delhi to Mumbai",
+        "riskLevel": "MEDIUM",
+        "totalDistance": 1400.5,
+        "createdAt": "2024-12-19T10:30:00.000Z"
+      }
+    ],
+    "highRiskRoutes": [
+      {
+        "routeId": "RT9876543210",
+        "routeName": "Mountain Pass Route",
+        "riskLevel": "CRITICAL",
+        "riskScores": {
+          "totalWeightedScore": 8.5
+        }
+      }
+    ],
+    "processingStatus": {
+      "completed": 20,
+      "pending": 5
+    },
+    "summary": {
+      "totalDistance": 15000,
+      "averageRiskScore": 4.5,
+      "lastUpdated": "2024-12-19T12:00:00.000Z"
+    }
+  }
+}</div>
+      </div>
+
+      <!-- Route Statistics -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/dashboard/statistics</h4>
+        <p>Get route statistics with timeframe filter</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET "http://localhost:3000/api/dashboard/statistics?timeframe=30d" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+      </div>
+
+      <!-- Risk Alerts -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/dashboard/alerts</h4>
+        <p>Get risk alerts for high-risk routes</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET "http://localhost:3000/api/dashboard/alerts?priority=critical" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+      </div>
+
+      <!-- Visibility Analysis Dashboard -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/dashboard/visibility-analysis</h4>
+        <p>Get visibility analysis summary for dashboard</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET http://localhost:3000/api/dashboard/visibility-analysis \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+      </div>
+
+      <!-- Route Safety Summary -->
+      <div class="mb-4">
+        <h4><span class="method-badge get">GET</span> /api/dashboard/route-safety-summary</h4>
+        <p>Get comprehensive safety summary</p>
+        
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <div class="curl-command">curl -X GET http://localhost:3000/api/dashboard/route-safety-summary \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+          <!-- Testing Workflow -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3 class="card-title">Complete Testing Workflow</h3>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-info">
+                <h4 class="alert-title">Step-by-Step Testing Guide</h4>
+                <p>Follow this sequence to test the complete system:</p>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="card card-sm">
+                    <div class="card-body">
+                      <h5 class="text-blue">Step 1: Authentication</h5>
+                      <ol>
+                        <li>Register new user</li>
+                        <li>Login to get JWT token</li>
+                        <li>Save token for subsequent requests</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="card card-sm">
+                    <div class="card-body">
+                      <h5 class="text-green">Step 2: Route Creation</h5>
+                      <ol>
+                        <li>Create manual route OR</li>
+                        <li>Upload GPS CSV file</li>
+                        <li>Verify route creation</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="card card-sm">
+                    <div class="card-body">
+                      <h5 class="text-yellow">Step 3: Data Collection</h5>
+                      <ol>
+                        <li>Run comprehensive data collection</li>
+                        <li>Check emergency services</li>
+                        <li>Verify weather & traffic data</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="card card-sm">
+                    <div class="card-body">
+                      <h5 class="text-red">Step 4: Risk Analysis</h5>
+                      <ol>
+                        <li>Calculate route risk</li>
+                        <li>Analyze visibility (sharp turns/blind spots)</li>
+                        <li>Check dashboard analytics</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <h5>Sample GPS CSV File Content:</h5>
+                <div class="response-json">28.7041,77.1025
+28.7045,77.1030
+28.7050,77.1035
+28.7055,77.1040
+28.7060,77.1045
+28.7065,77.1050
+28.7070,77.1055</div>
+                <p class="text-muted">Save this as <code>sample_route.csv</code> and use with the GPS upload endpoint.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Environment Variables -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3 class="card-title">Environment Setup</h3>
+            </div>
+            <div class="card-body">
+              <h5>Required Environment Variables:</h5>
+              <div class="response-json"># Database
+MONGODB_URI=mongodb://127.0.0.1:27017/hpcl_journey_risk
+
+# JWT
+JWT_SECRET=your_secure_jwt_secret_key
+JWT_EXPIRE=7d
+
+# API Keys (Optional but recommended)
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+OPENWEATHER_API_KEY=your_openweather_api_key
+TOMTOM_API_KEY=your_tomtom_api_key
+
+# Server
+PORT=3000
+NODE_ENV=development</div>
+
+              <div class="alert alert-warning mt-3">
+                <h5>API Keys Impact:</h5>
+                <ul class="mb-0">
+                  <li><strong>Google Maps API:</strong> Enables real elevation data, street view images, and places detection</li>
+                  <li><strong>OpenWeather API:</strong> Provides real weather conditions</li>
+                  <li><strong>TomTom API:</strong> Gives real traffic data</li>
+                  <li><strong>Without APIs:</strong> System uses mock data but remains fully functional</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Codes -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3 class="card-title">Common Response Codes</h3>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-vcenter">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Status</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="badge bg-green">200</span></td>
+                      <td>OK</td>
+                      <td>Request successful</td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge bg-blue">201</span></td>
+                      <td>Created</td>
+                      <td>Resource created successfully</td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge bg-yellow">400</span></td>
+                      <td>Bad Request</td>
+                      <td>Invalid request data</td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge bg-orange">401</span></td>
+                      <td>Unauthorized</td>
+                      <td>Missing or invalid JWT token</td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge bg-red">404</span></td>
+                      <td>Not Found</td>
+                      <td>Resource not found</td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge bg-red">500</span></td>
+                      <td>Server Error</td>
+                      <td>Internal server error</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+  <script>
+    function copyToClipboard(button) {
+      const codeContainer = button.parentElement;
+      const curlCommand = codeContainer.querySelector('.curl-command');
+      const text = curlCommand.textContent;
+      
+      navigator.clipboard.writeText(text).then(function() {
+        button.textContent = 'Copied!';
+        button.style.backgroundColor = '#28a745';
+        setTimeout(function() {
+          button.textContent = 'Copy';
+          button.style.backgroundColor = '#6c757d';
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

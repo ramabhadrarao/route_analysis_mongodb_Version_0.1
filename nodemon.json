@@ -1,0 +1,33 @@
+{
+  "verbose": true,
+  "ignore": [
+    "downloads/**/*",
+    "uploads/**/*", 
+    "logs/**/*",
+    "public/images/**/*",
+    "public/reports/**/*",
+    "*.log",
+    "*.jpg",
+    "*.png",
+    "*.jpeg",
+    "*.pdf",
+    "node_modules/**/*",
+    ".git/**/*",
+    "temp/**/*"
+  ],
+  "watch": [
+    "routes/",
+    "controllers/", 
+    "models/",
+    "services/",
+    "middleware/",
+    "utils/",
+    "server.js"
+  ],
+  "ext": "js,json",
+  "delay": "2000",
+  "restartable": "rs",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

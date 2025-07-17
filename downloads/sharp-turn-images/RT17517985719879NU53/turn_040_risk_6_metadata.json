@@ -1,0 +1,56 @@
+{
+  "turnInfo": {
+    "id": "686a56e341efc5f2856cd7ed",
+    "coordinates": {
+      "latitude": 29.86012,
+      "longitude": 77.33331
+    },
+    "distanceFromStart": 132.41,
+    "turnAngle": 82.76,
+    "turnDirection": "straight",
+    "riskScore": 6,
+    "severity": "moderate",
+    "recommendedSpeed": 80,
+    "analysisMethod": "enhanced_gps_analysis",
+    "confidence": 0.9
+  },
+  "images": {
+    "streetView": {
+      "localPath": "downloads\\sharp-turn-images\\RT17517985719879NU53\\turn_040_risk_6_street_view.jpg",
+      "filename": "turn_040_risk_6_street_view.jpg",
+      "url": "https://maps.googleapis.com/maps/api/streetview?location=29.86012,77.33331&size=640x640&heading=24.828&pitch=0&fov=120&key=AIzaSyAXa6qLmUm7YEoUOqpIZF8A00663AKgq68",
+      "publicUrl": "http://localhost:3000/downloads/sharp-turn-images/RT17517985719879NU53/turn_040_risk_6_street_view.jpg",
+      "type": "street_view"
+    },
+    "satellite": {
+      "localPath": "downloads\\sharp-turn-images\\RT17517985719879NU53\\turn_040_risk_6_satellite.jpg",
+      "filename": "turn_040_risk_6_satellite.jpg",
+      "url": "https://maps.googleapis.com/maps/api/staticmap?center=29.86012,77.33331&zoom=18&size=640x640&maptype=satellite&markers=color:orange%7Clabel:6%7C29.86012,77.33331&key=AIzaSyAXa6qLmUm7YEoUOqpIZF8A00663AKgq68",
+      "publicUrl": "http://localhost:3000/downloads/sharp-turn-images/RT17517985719879NU53/turn_040_risk_6_satellite.jpg",
+      "type": "satellite"
+    },
+    "roadmap": {
+      "localPath": "downloads\\sharp-turn-images\\RT17517985719879NU53\\turn_040_risk_6_roadmap.jpg",
+      "filename": "turn_040_risk_6_roadmap.jpg",
+      "url": "https://maps.googleapis.com/maps/api/staticmap?center=29.86012,77.33331&zoom=17&size=640x640&maptype=roadmap&markers=color:orange%7Clabel:T%7C29.86012,77.33331&key=AIzaSyAXa6qLmUm7YEoUOqpIZF8A00663AKgq68",
+      "publicUrl": "http://localhost:3000/downloads/sharp-turn-images/RT17517985719879NU53/turn_040_risk_6_roadmap.jpg",
+      "type": "roadmap"
+    },
+    "metadata": null
+  },
+  "downloadInfo": {
+    "timestamp": "2025-07-06T11:11:25.980Z",
+    "quality": "high",
+    "imageTypes": [
+      "street",
+      "satellite",
+      "roadmap"
+    ],
+    "apiKey": "configured"
+  },
+  "urls": {
+    "streetView": "https://maps.googleapis.com/maps/api/streetview?location=29.86012,77.33331&size=640x640&heading=24.828&pitch=0&fov=120&key=AIzaSyAXa6qLmUm7YEoUOqpIZF8A00663AKgq68",
+    "satellite": "https://maps.googleapis.com/maps/api/staticmap?center=29.86012,77.33331&zoom=18&size=640x640&maptype=satellite&markers=color:orange%7Clabel:6%7C29.86012,77.33331&key=AIzaSyAXa6qLmUm7YEoUOqpIZF8A00663AKgq68",
+    "roadmap": "https://maps.googleapis.com/maps/api/staticmap?center=29.86012,77.33331&zoom=17&size=640x640&maptype=roadmap&markers=color:orange%7Clabel:T%7C29.86012,77.33331&key=AIzaSyAXa6qLmUm7YEoUOqpIZF8A00663AKgq68"
+  }
+}

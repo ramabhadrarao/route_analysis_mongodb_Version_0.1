@@ -1,0 +1,3823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HPCL Journey Risk Management API Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container-fluid {
+            padding: 2rem;
+        }
+        
+        .api-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 3rem 0;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .api-section {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .endpoint-card {
+            border: none;
+            border-left: 5px solid;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .endpoint-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .method-get { border-left-color: #28a745; }
+        .method-post { border-left-color: #007bff; }
+        .method-put { border-left-color: #ffc107; }
+        .method-delete { border-left-color: #dc3545; }
+        
+        .method-badge {
+            font-weight: bold;
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+        }
+        
+        .method-get .method-badge { background: #28a745; color: white; }
+        .method-post .method-badge { background: #007bff; color: white; }
+        .method-put .method-badge { background: #ffc107; color: dark; }
+        .method-delete .method-badge { background: #dc3545; color: white; }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4a5568;
+            border: none;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: #2d3748;
+        }
+        
+        .response-example {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .nav-pills .nav-link {
+            color: #667eea;
+            border-radius: 25px;
+            margin: 0 0.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .table td {
+            vertical-align: middle;
+            border-color: #e9ecef;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-200 { background: #d4edda; color: #155724; }
+        .status-201 { background: #cce5ff; color: #004085; }
+        .status-400 { background: #f8d7da; color: #721c24; }
+        .status-401 { background: #f5c6cb; color: #721c24; }
+        .status-404 { background: #f8d7da; color: #721c24; }
+        .status-500 { background: #f8d7da; color: #721c24; }
+
+        .accordion-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border: none;
+        }
+
+        .toc {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .toc a:hover {
+            color: #2a5298;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="api-header text-center">
+            <h1><i class="fas fa-route"></i> HPCL Journey Risk Management System</h1>
+            <h2>Complete API Documentation</h2>
+            <p class="lead">Version 2.0.0 | Enhanced Route Safety Analysis Platform</p>
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <h3>50+</h3>
+                        <p>API Endpoints</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <h3>8</h3>
+                        <p>Core Modules</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <h3>Real-time</h3>
+                        <p>Data Analysis</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <h3>RESTful</h3>
+                        <p>Architecture</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Table of Contents -->
+            <div class="col-lg-3">
+                <div class="toc">
+                    <h5><i class="fas fa-list"></i> Table of Contents</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#authentication">🔐 Authentication</a></li>
+                        <li><a href="#routes">🛣️ Route Management</a></li>
+                        <li><a href="#risk">⚠️ Risk Assessment</a></li>
+                        <li><a href="#dashboard">📊 Dashboard</a></li>
+                        <li><a href="#visibility">👁️ Visibility Analysis</a></li>
+                        <li><a href="#network">📶 Network Coverage</a></li>
+                        <li><a href="#road-conditions">🛤️ Road Conditions</a></li>
+                        <li><a href="#pdf">📄 PDF Generation</a></li>
+                        <li><a href="#images">🖼️ Image Management</a></li>
+                    </ul>
+                    
+                    <div class="mt-4">
+                        <h6>Base URL</h6>
+                        <code>http://localhost:3000</code>
+                        
+                        <h6 class="mt-3">Authentication</h6>
+                        <small>Most endpoints require JWT token in Authorization header:<br>
+                        <code>Bearer &lt;token&gt;</code></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <!-- Authentication Section -->
+                <div id="authentication" class="api-section">
+                    <h2 class="section-header"><i class="fas fa-shield-alt"></i> Authentication</h2>
+                    <div class="p-4">
+                        <p class="mb-4">Manage user authentication, registration, and profile operations.</p>
+                        
+                        <!-- Register User -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/auth/register</strong>
+                                </div>
+                                <small class="text-muted">Register new user</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="register-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#register-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="register-details" class="accordion-collapse collapse show" data-bs-parent="#register-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Request Body:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('register-body')">Copy</button>
+                                                    <pre class="code-block" id="register-body">{
+  "username": "john_doe",
+  "email": "john@hpcl.com",
+  "password": "SecurePass123",
+  "role": "user",
+  "profile": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "department": "Transportation",
+    "employeeId": "EMP001"
+  }
+}</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('register-curl')">Copy</button>
+                                                    <pre class="code-block" id="register-curl">curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "john_doe",
+    "email": "john@hpcl.com", 
+    "password": "SecurePass123",
+    "role": "user",
+    "profile": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "department": "Transportation",
+      "employeeId": "EMP001"
+    }
+  }'</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Postman:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <tr><th>Method</th><td>POST</td></tr>
+                                                        <tr><th>URL</th><td>{{baseUrl}}/api/auth/register</td></tr>
+                                                        <tr><th>Headers</th><td>Content-Type: application/json</td></tr>
+                                                        <tr><th>Body</th><td>raw JSON (see above)</td></tr>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-201">201 Created</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "User registered successfully",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "64f5e8b2c9a1b2c3d4e5f6g7",
+    "username": "john_doe",
+    "email": "john@hpcl.com",
+    "role": "user",
+    "profile": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "department": "Transportation",
+      "employeeId": "EMP001"
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Login User -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/auth/login</strong>
+                                </div>
+                                <small class="text-muted">User login</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="login-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#login-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="login-details" class="accordion-collapse collapse" data-bs-parent="#login-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Request Body:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('login-body')">Copy</button>
+                                                    <pre class="code-block" id="login-body">{
+  "email": "john@hpcl.com",
+  "password": "SecurePass123"
+}</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('login-curl')">Copy</button>
+                                                    <pre class="code-block" id="login-curl">curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@hpcl.com",
+    "password": "SecurePass123"
+  }'</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "64f5e8b2c9a1b2c3d4e5f6g7",
+    "username": "john_doe",
+    "email": "john@hpcl.com",
+    "role": "user",
+    "profile": {
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "lastLogin": "2024-01-15T10:30:00.000Z"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Profile -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/auth/profile</strong>
+                                </div>
+                                <small class="text-muted">Get user profile</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="profile-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#profile-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="profile-details" class="accordion-collapse collapse" data-bs-parent="#profile-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('profile-curl')">Copy</button>
+                                                    <pre class="code-block" id="profile-curl">curl -X GET http://localhost:3000/api/auth/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "user": {
+    "id": "64f5e8b2c9a1b2c3d4e5f6g7",
+    "username": "john_doe",
+    "email": "john@hpcl.com",
+    "role": "user",
+    "profile": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "department": "Transportation",
+      "employeeId": "EMP001"
+    },
+    "lastLogin": "2024-01-15T10:30:00.000Z",
+    "createdAt": "2024-01-01T08:00:00.000Z"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logout -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/auth/logout</strong>
+                                </div>
+                                <small class="text-muted">User logout</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="logout-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#logout-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="logout-details" class="accordion-collapse collapse" data-bs-parent="#logout-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('logout-curl')">Copy</button>
+                                                    <pre class="code-block" id="logout-curl">curl -X POST http://localhost:3000/api/auth/logout \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Logout successful"
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Route Management Section -->
+                <div id="routes" class="api-section">
+                    <h2 class="section-header"><i class="fas fa-route"></i> Route Management</h2>
+                    <div class="p-4">
+                        <p class="mb-4">Create, manage, and analyze routes with GPS data and comprehensive data collection.</p>
+                        
+                        <!-- Create Route -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/routes</strong>
+                                </div>
+                                <small class="text-muted">Create route manually</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="create-route-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#create-route-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="create-route-details" class="accordion-collapse collapse" data-bs-parent="#create-route-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Request Body:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('create-route-body')">Copy</button>
+                                                    <pre class="code-block" id="create-route-body">{
+  "routeName": "Mumbai to Pune Express",
+  "fromAddress": "Mumbai Central Station, Mumbai",
+  "fromCode": "MUM",
+  "fromName": "Mumbai Central",
+  "fromCoordinates": {
+    "latitude": 19.0760,
+    "longitude": 72.8777
+  },
+  "toAddress": "Pune Junction, Pune",
+  "toCode": "PUN", 
+  "toName": "Pune Junction",
+  "toCoordinates": {
+    "latitude": 18.5204,
+    "longitude": 73.8567
+  },
+  "terrain": "mixed",
+  "majorHighways": ["NH48", "Mumbai-Pune Expressway"]
+}</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('create-route-curl')">Copy</button>
+                                                    <pre class="code-block" id="create-route-curl">curl -X POST http://localhost:3000/api/routes \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "routeName": "Mumbai to Pune Express",
+    "fromAddress": "Mumbai Central Station, Mumbai",
+    "fromCode": "MUM",
+    "fromName": "Mumbai Central",
+    "fromCoordinates": {
+      "latitude": 19.0760,
+      "longitude": 72.8777
+    },
+    "toAddress": "Pune Junction, Pune", 
+    "toCode": "PUN",
+    "toName": "Pune Junction",
+    "toCoordinates": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
+    "terrain": "mixed",
+    "majorHighways": ["NH48", "Mumbai-Pune Expressway"]
+  }'</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-201">201 Created</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Route created successfully",
+  "route": {
+    "id": "64f5e8b2c9a1b2c3d4e5f6g7",
+    "routeId": "RT1704448800001ABC",
+    "routeName": "Mumbai to Pune Express",
+    "fromAddress": "Mumbai Central Station, Mumbai",
+    "toAddress": "Pune Junction, Pune", 
+    "totalDistance": 148.7,
+    "estimatedDuration": 178,
+    "liveMapLink": "https://www.google.com/maps/dir/19.0760,72.8777/18.5204,73.8567"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload GPS Route -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/routes/upload-gps-route</strong>
+                                </div>
+                                <small class="text-muted">Upload GPS CSV file</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="upload-gps-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#upload-gps-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="upload-gps-details" class="accordion-collapse collapse" data-bs-parent="#upload-gps-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Form Data:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Field</th>
+                                                                <th>Type</th>
+                                                                <th>Required</th>
+                                                                <th>Description</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>gpsFile</td>
+                                                                <td>file</td>
+                                                                <td>Yes</td>
+                                                                <td>CSV file with lat,lng coordinates</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>fromCode</td>
+                                                                <td>text</td>
+                                                                <td>Yes</td>
+                                                                <td>Origin code (e.g., MUM)</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>fromName</td>
+                                                                <td>text</td>
+                                                                <td>Yes</td>
+                                                                <td>Origin name</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>toCode</td>
+                                                                <td>text</td>
+                                                                <td>Yes</td>
+                                                                <td>Destination code</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>toName</td>
+                                                                <td>text</td>
+                                                                <td>Yes</td>
+                                                                <td>Destination name</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>routeName</td>
+                                                                <td>text</td>
+                                                                <td>No</td>
+                                                                <td>Custom route name</td>
+                                                            <tr>
+                                                                <td>routeName</td>
+                                                                <td>text</td>
+                                                                <td>No</td>
+                                                                <td>Custom route name</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>terrain</td>
+                                                                <td>text</td>
+                                                                <td>No</td>
+                                                                <td>flat, hilly, urban, rural, mixed</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('upload-gps-curl')">Copy</button>
+                                                    <pre class="code-block" id="upload-gps-curl">curl -X POST http://localhost:3000/api/routes/upload-gps-route \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "gpsFile=@route_gps_data.csv" \
+  -F "fromCode=MUM" \
+  -F "fromName=Mumbai Central" \
+  -F "toCode=PUN" \
+  -F "toName=Pune Junction" \
+  -F "routeName=Mumbai-Pune GPS Route" \
+  -F "terrain=mixed"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-201">201 Created</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "GPS route created successfully with 1247 tracking points",
+  "data": {
+    "route": {
+      "id": "64f5e8b2c9a1b2c3d4e5f6g7",
+      "routeId": "RT1704448800002GPS",
+      "routeName": "Mumbai-Pune GPS Route",
+      "fromCode": "MUM",
+      "fromName": "Mumbai Central",
+      "toCode": "PUN",
+      "toName": "Pune Junction",
+      "totalDistance": 149.2,
+      "estimatedDuration": 224,
+      "liveMapLink": "https://www.google.com/maps/dir/19.0760,72.8777/...",
+      "gpsTracking": {
+        "totalPoints": 1247,
+        "startPoint": "19.0760, 72.8777",
+        "endPoint": "18.5204, 73.8567",
+        "parseErrors": 0,
+        "accuracy": "excellent"
+      }
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get All Routes -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/routes</strong>
+                                </div>
+                                <small class="text-muted">Get all routes with pagination</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="get-routes-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#get-routes-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="get-routes-details" class="accordion-collapse collapse" data-bs-parent="#get-routes-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Query Parameters:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Parameter</th>
+                                                                <th>Type</th>
+                                                                <th>Default</th>
+                                                                <th>Description</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>page</td>
+                                                                <td>integer</td>
+                                                                <td>1</td>
+                                                                <td>Page number</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>limit</td>
+                                                                <td>integer</td>
+                                                                <td>10</td>
+                                                                <td>Items per page (1-100)</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>search</td>
+                                                                <td>string</td>
+                                                                <td>-</td>
+                                                                <td>Search route name/locations</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>riskLevel</td>
+                                                                <td>string</td>
+                                                                <td>-</td>
+                                                                <td>LOW, MEDIUM, HIGH, CRITICAL</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('get-routes-curl')">Copy</button>
+                                                    <pre class="code-block" id="get-routes-curl">curl -X GET "http://localhost:3000/api/routes?page=1&limit=10&search=mumbai&riskLevel=HIGH" \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routes": [
+      {
+        "id": "64f5e8b2c9a1b2c3d4e5f6g7",
+        "routeId": "RT1704448800001ABC",
+        "routeName": "Mumbai to Pune Express",
+        "fromName": "Mumbai Central",
+        "toName": "Pune Junction",
+        "totalDistance": 148.7,
+        "estimatedDuration": 178,
+        "riskLevel": "HIGH",
+        "terrain": "mixed",
+        "createdAt": "2024-01-15T08:30:00.000Z"
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 3,
+      "totalRoutes": 25,
+      "hasNextPage": true,
+      "hasPrevPage": false
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Single Route -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/routes/:id</strong>
+                                </div>
+                                <small class="text-muted">Get route details with GPS points</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="get-route-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#get-route-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="get-route-details" class="accordion-collapse collapse" data-bs-parent="#get-route-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('get-route-curl')">Copy</button>
+                                                    <pre class="code-block" id="get-route-curl">curl -X GET http://localhost:3000/api/routes/64f5e8b2c9a1b2c3d4e5f6g7 \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "route": {
+    "id": "64f5e8b2c9a1b2c3d4e5f6g7",
+    "routeId": "RT1704448800001ABC",
+    "routeName": "Mumbai to Pune Express",
+    "fromAddress": "Mumbai Central Station, Mumbai",
+    "toAddress": "Pune Junction, Pune",
+    "totalDistance": 148.7,
+    "estimatedDuration": 178,
+    "routePoints": [
+      {
+        "latitude": 19.0760,
+        "longitude": 72.8777,
+        "pointOrder": 0,
+        "distanceFromStart": 0,
+        "distanceToEnd": 148.7
+      }
+    ],
+    "riskScores": {
+      "roadConditions": 6.2,
+      "accidentProne": 7.1,
+      "sharpTurns": 5.8,
+      "blindSpots": 6.5,
+      "totalWeightedScore": 6.4,
+      "riskGrade": "C"
+    },
+    "riskLevel": "HIGH",
+    "liveMapLink": "https://www.google.com/maps/dir/19.0760,72.8777/18.5204,73.8567"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Collect All Data -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/routes/:id/collect-all-data</strong>
+                                </div>
+                                <small class="text-muted">Comprehensive data collection</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="collect-data-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collect-data-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="collect-data-details" class="accordion-collapse collapse" data-bs-parent="#collect-data-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('collect-data-curl')">Copy</button>
+                                                    <pre class="code-block" id="collect-data-curl">curl -X POST http://localhost:3000/api/routes/64f5e8b2c9a1b2c3d4e5f6g7/collect-all-data \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "ENHANCED comprehensive data collection completed successfully",
+  "routeInfo": {
+    "routeId": "RT1704448800001ABC",
+    "routeName": "Mumbai to Pune Express",
+    "totalDistance": 148.7,
+    "terrain": "mixed",
+    "gpsPoints": 1247
+  },
+  "executionSummary": {
+    "totalSteps": 7,
+    "successfulSteps": 6,
+    "failedSteps": 1,
+    "successRate": 86,
+    "totalExecutionTime": "45.32s"
+  },
+  "overallSummary": {
+    "dataCategories": {
+      "emergencyServices": 23,
+      "weatherPoints": 156,
+      "seasonalWeatherPoints": 312,
+      "trafficPoints": 89,
+      "accidentAreas": 12,
+      "roadConditions": 178,
+      "sharpTurns": 34,
+      "blindSpots": 18,
+      "networkCoveragePoints": 87,
+      "deadZones": 3
+    },
+    "totalDataPoints": 912,
+    "dataQuality": {
+      "level": "excellent",
+      "successRate": 86
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Assessment Section -->
+                <div id="risk" class="api-section">
+                    <h2 class="section-header"><i class="fas fa-exclamation-triangle"></i> Risk Assessment</h2>
+                    <div class="p-4">
+                        <p class="mb-4">Calculate and analyze route risk factors with comprehensive scoring.</p>
+                        
+                        <!-- Calculate Risk -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/risk/calculate/:routeId</strong>
+                                </div>
+                                <small class="text-muted">Calculate route risk</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="calc-risk-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#calc-risk-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="calc-risk-details" class="accordion-collapse collapse" data-bs-parent="#calc-risk-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('calc-risk-curl')">Copy</button>
+                                                    <pre class="code-block" id="calc-risk-curl">curl -X GET http://localhost:3000/api/risk/calculate/64f5e8b2c9a1b2c3d4e5f6g7 \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Route risk calculated successfully using comprehensive data",
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7,
+      "terrain": "mixed"
+    },
+    "riskAssessment": {
+      "totalScore": 6.4,
+      "riskGrade": "C",
+      "riskLevel": "HIGH",
+      "confidence": 0.85
+    },
+    "riskBreakdown": {
+      "roadConditions": 6.2,
+      "accidentProne": 7.1,
+      "sharpTurns": 5.8,
+      "blindSpots": 6.5,
+      "twoWayTraffic": 5.9,
+      "trafficDensity": 6.8,
+      "weatherConditions": 5.4,
+      "emergencyServices": 4.2,
+      "networkCoverage": 7.3,
+      "amenities": 3.8
+    },
+    "analysis": {
+      "topRiskFactors": [
+        {
+          "factor": "networkCoverage",
+          "score": 7.3,
+          "impact": "Communication gaps in 3 dead zones"
+        },
+        {
+          "factor": "accidentProne", 
+          "score": 7.1,
+          "impact": "12 high-risk accident areas identified"
+        }
+      ],
+      "recommendations": [
+        "Install satellite communication for dead zones",
+        "Implement convoy travel in accident-prone areas",
+        "Reduce speed in sharp turn sections"
+      ]
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Batch Calculate -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/risk/batch-calculate</strong>
+                                </div>
+                                <small class="text-muted">Calculate risk for multiple routes</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="batch-risk-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#batch-risk-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="batch-risk-details" class="accordion-collapse collapse" data-bs-parent="#batch-risk-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Request Body:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('batch-risk-body')">Copy</button>
+                                                    <pre class="code-block" id="batch-risk-body">{
+  "routeIds": [
+    "64f5e8b2c9a1b2c3d4e5f6g7",
+    "64f5e8b2c9a1b2c3d4e5f6g8",
+    "64f5e8b2c9a1b2c3d4e5f6g9"
+  ]
+}</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('batch-risk-curl')">Copy</button>
+                                                    <pre class="code-block" id="batch-risk-curl">curl -X POST http://localhost:3000/api/risk/batch-calculate \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "routeIds": [
+      "64f5e8b2c9a1b2c3d4e5f6g7",
+      "64f5e8b2c9a1b2c3d4e5f6g8"
+    ]
+  }'</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Batch risk calculation completed",
+  "data": {
+    "totalProcessed": 2,
+    "successful": 2,
+    "failed": 0,
+    "results": [
+      {
+        "routeId": "RT1704448800001ABC",
+        "routeName": "Mumbai to Pune Express",
+        "success": true,
+        "riskScore": 6.4,
+        "riskGrade": "C",
+        "riskLevel": "HIGH",
+        "confidence": 0.85
+      },
+      {
+        "routeId": "RT1704448800002GPS",
+        "routeName": "Delhi to Agra Highway",
+        "success": true,
+        "riskScore": 4.2,
+        "riskGrade": "B",
+        "riskLevel": "MEDIUM",
+        "confidence": 0.92
+      }
+    ],
+    "summary": {
+      "averageRiskScore": 5.3,
+      "highRiskRoutes": 1,
+      "criticalRiskRoutes": 0
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risk Summary -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/risk/summary</strong>
+                                </div>
+                                <small class="text-muted">Get risk summary for all routes</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="risk-summary-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#risk-summary-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="risk-summary-details" class="accordion-collapse collapse" data-bs-parent="#risk-summary-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('risk-summary-curl')">Copy</button>
+                                                    <pre class="code-block" id="risk-summary-curl">curl -X GET http://localhost:3000/api/risk/summary \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "totalRoutes": 25,
+    "riskDistribution": {
+      "LOW": 8,
+      "MEDIUM": 12,
+      "HIGH": 4,
+      "CRITICAL": 1
+    },
+    "averageRiskScore": 5.2,
+    "highestRiskRoute": {
+      "routeId": "RT1704448800003CRT",
+      "routeName": "Mountain Pass Route",
+      "riskLevel": "CRITICAL",
+      "riskScore": 8.7
+    },
+    "lowestRiskRoute": {
+      "routeId": "RT1704448800004LOW", 
+      "routeName": "City Express Route",
+      "riskLevel": "LOW",
+      "riskScore": 2.1
+    },
+    "routesNeedingAttention": [
+      {
+        "routeId": "RT1704448800003CRT",
+        "routeName": "Mountain Pass Route",
+        "riskLevel": "CRITICAL",
+        "riskScore": 8.7
+      }
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="api-section">
+                    <h2 class="section-header"><i class="fas fa-chart-line"></i> Dashboard Analytics</h2>
+                    <div class="p-4">
+                        <p class="mb-4">Get analytics, statistics, and overview data for dashboard visualizations.</p>
+
+                        <!-- Dashboard Overview -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/dashboard/overview</strong>
+                                </div>
+                                <small class="text-muted">Get dashboard overview</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="dashboard-overview-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dashboard-overview-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="dashboard-overview-details" class="accordion-collapse collapse" data-bs-parent="#dashboard-overview-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('dashboard-overview-curl')">Copy</button>
+                                                    <pre class="code-block" id="dashboard-overview-curl">curl -X GET http://localhost:3000/api/dashboard/overview \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "totalRoutes": 25,
+    "riskDistribution": {
+      "LOW": 8,
+      "MEDIUM": 12,
+      "HIGH": 4,
+      "CRITICAL": 1
+    },
+    "recentRoutes": [
+      {
+        "routeId": "RT1704448800001ABC",
+        "routeName": "Mumbai to Pune Express",
+        "fromName": "Mumbai Central",
+        "toName": "Pune Junction",
+        "riskLevel": "HIGH",
+        "totalDistance": 148.7,
+        "createdAt": "2024-01-15T08:30:00.000Z"
+      }
+    ],
+    "highRiskRoutes": [
+      {
+        "routeId": "RT1704448800003CRT",
+        "routeName": "Mountain Pass Route",
+        "riskLevel": "CRITICAL",
+        "riskScores": {
+          "totalWeightedScore": 8.7
+        }
+      }
+    ],
+    "summary": {
+      "totalDistance": 3450,
+      "averageRiskScore": 5.2,
+      "lastUpdated": "2024-01-15T12:00:00.000Z"
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Route Statistics -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/dashboard/statistics</strong>
+                                </div>
+                                <small class="text-muted">Get route statistics with timeframes</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="dashboard-stats-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dashboard-stats-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="dashboard-stats-details" class="accordion-collapse collapse" data-bs-parent="#dashboard-stats-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Query Parameters:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Parameter</th>
+                                                                <th>Type</th>
+                                                                <th>Options</th>
+                                                                <th>Default</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>timeframe</td>
+                                                                <td>string</td>
+                                                                <td>7d, 30d, 90d, 1y</td>
+                                                                <td>30d</td>
+                                                                </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('dashboard-stats-curl')">Copy</button>
+                                                    <pre class="code-block" id="dashboard-stats-curl">curl -X GET "http://localhost:3000/api/dashboard/statistics?timeframe=30d" \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "timeframe": "30d",
+    "routeCreationTrend": [
+      {
+        "date": "2024-01-01",
+        "count": 3,
+        "totalDistance": 456.2,
+        "avgRiskScore": 5.1
+      },
+      {
+        "date": "2024-01-02", 
+        "count": 2,
+        "totalDistance": 298.7,
+        "avgRiskScore": 4.8
+      }
+    ],
+    "summary": {
+      "totalRoutesInPeriod": 25,
+      "totalDistanceInPeriod": 3450.8,
+      "avgRiskScore": 5.2
+    },
+    "dataSource": "REAL_DATABASE_AGGREGATION"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risk Alerts -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/dashboard/alerts</strong>
+                                </div>
+                                <small class="text-muted">Get risk alerts</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="dashboard-alerts-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dashboard-alerts-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="dashboard-alerts-details" class="accordion-collapse collapse" data-bs-parent="#dashboard-alerts-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Query Parameters:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>priority</td>
+                                                                <td>string</td>
+                                                                <td>all, critical, high</td>
+                                                                <td>all</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('dashboard-alerts-curl')">Copy</button>
+                                                    <pre class="code-block" id="dashboard-alerts-curl">curl -X GET "http://localhost:3000/api/dashboard/alerts?priority=critical" \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "totalAlerts": 2,
+    "alerts": [
+      {
+        "routeId": "RT1704448800003CRT",
+        "routeName": "Mountain Pass Route",
+        "fromName": "Base Camp",
+        "toName": "Summit Point",
+        "riskLevel": "CRITICAL",
+        "totalRiskScore": 8.7,
+        "alerts": [
+          {
+            "type": "CRITICAL",
+            "message": "Route Mountain Pass Route has critical risk level (8.7)",
+            "recommendation": "Consider alternative routes or additional safety measures"
+          }
+        ],
+        "lastUpdated": "2024-01-15T10:30:00.000Z"
+      }
+    ],
+    "summary": {
+      "critical": 1,
+      "high": 1,
+      "medium": 0
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visibility Analysis -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/dashboard/visibility-analysis</strong>
+                                </div>
+                                <small class="text-muted">Get visibility analysis overview</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="dashboard-visibility-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dashboard-visibility-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="dashboard-visibility-details" class="accordion-collapse collapse" data-bs-parent="#dashboard-visibility-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('dashboard-visibility-curl')">Copy</button>
+                                                    <pre class="code-block" id="dashboard-visibility-curl">curl -X GET http://localhost:3000/api/dashboard/visibility-analysis \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "summary": {
+      "totalRoutes": 25,
+      "totalSharpTurns": 234,
+      "totalBlindSpots": 156,
+      "criticalTurns": 23,
+      "criticalSpots": 18,
+      "avgTurnRisk": 5.8,
+      "avgSpotRisk": 6.2,
+      "totalCriticalPoints": 41
+    },
+    "breakdown": {
+      "turnSeverity": {
+        "hairpin": 12,
+        "sharp": 67,
+        "moderate": 98,
+        "gentle": 57
+      },
+      "spotTypes": {
+        "crest": 45,
+        "curve": 78,
+        "obstruction": 23,
+        "other": 10
+      }
+    },
+    "dangerousRoutes": [
+      {
+        "routeId": "RT1704448800003CRT",
+        "routeName": "Mountain Pass Route",
+        "distance": 89.5,
+        "sharpTurns": 23,
+        "blindSpots": 18,
+        "criticalTurns": 8,
+        "criticalSpots": 6
+      }
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visibility Analysis Section -->
+                <div id="visibility" class="api-section">
+                    <h2 class="section-header"><i class="fas fa-eye"></i> Visibility Analysis</h2>
+                    <div class="p-4">
+                        <p class="mb-4">Analyze sharp turns and blind spots with enhanced calculations and real API integration.</p>
+
+                        <!-- Analyze Visibility -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/routes/:id/analyze-visibility</strong>
+                                </div>
+                                <small class="text-muted">Enhanced visibility analysis with Google APIs</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="analyze-visibility-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#analyze-visibility-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="analyze-visibility-details" class="accordion-collapse collapse" data-bs-parent="#analyze-visibility-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('analyze-visibility-curl')">Copy</button>
+                                                    <pre class="code-block" id="analyze-visibility-curl">curl -X POST http://localhost:3000/api/routes/64f5e8b2c9a1b2c3d4e5f6g7/analyze-visibility \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "ENHANCED visibility analysis completed successfully",
+  "routeInfo": {
+    "routeId": "RT1704448800001ABC",
+    "routeName": "Mumbai to Pune Express",
+    "totalDistance": 148.7,
+    "terrain": "mixed",
+    "gpsPoints": 1247
+  },
+  "analysisResults": {
+    "summary": {
+      "totalSharpTurns": 34,
+      "totalBlindSpots": 18,
+      "criticalTurns": 8,
+      "criticalBlindSpots": 6,
+      "overallRiskLevel": "HIGH",
+      "avgTurnRisk": 6.2,
+      "avgBlindSpotRisk": 6.8
+    },
+    "processingDetails": {
+      "apiIntegrations": {
+        "googleElevationAPI": "ACTIVE",
+        "googlePlacesAPI": "ACTIVE",
+        "googleStreetViewAPI": "ACTIVE"
+      },
+      "calculationMethods": {
+        "elevationAnalysis": "Physics-based ray tracing with earth curvature",
+        "curveAnalysis": "AASHTO geometric sight distance standards",
+        "obstructionAnalysis": "Geometric shadow zone calculations"
+      }
+    }
+  },
+  "criticalFindings": {
+    "totalCriticalPoints": 14,
+    "immediateActionRequired": true,
+    "routeRiskLevel": "HIGH"
+  },
+  "enhancementStatus": {
+    "realCalculationsActive": true,
+    "googleAPIIntegration": true,
+    "validationLevel": "STRICT"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Sharp Turns -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/routes/:id/sharp-turns</strong>
+                                </div>
+                                <small class="text-muted">Get sharp turns data</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="sharp-turns-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sharp-turns-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="sharp-turns-details" class="accordion-collapse collapse" data-bs-parent="#sharp-turns-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Query Parameters:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>includeImages</td>
+                                                                <td>boolean</td>
+                                                                <td>true, false</td>
+                                                                <td>false</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>riskLevel</td>
+                                                                <td>string</td>
+                                                                <td>all, low, medium, high, critical</td>
+                                                                <td>all</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('sharp-turns-curl')">Copy</button>
+                                                    <pre class="code-block" id="sharp-turns-curl">curl -X GET "http://localhost:3000/api/routes/64f5e8b2c9a1b2c3d4e5f6g7/sharp-turns?riskLevel=critical" \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7
+    },
+    "summary": {
+      "totalSharpTurns": 34,
+      "averageRiskScore": 6.2,
+      "maxRiskScore": 8.9,
+      "criticalTurns": 8,
+      "severityBreakdown": {
+        "hairpin": 3,
+        "sharp": 12,
+        "moderate": 15,
+        "gentle": 4
+      }
+    },
+    "sharpTurns": [
+      {
+        "id": "64f5e8b2c9a1b2c3d4e5f6g7",
+        "coordinates": {
+          "latitude": 19.2345,
+          "longitude": 73.1234
+        },
+        "distanceFromStart": 45.6,
+        "turnAngle": 135,
+        "turnDirection": "right",
+        "recommendedSpeed": 25,
+        "riskScore": 8.9,
+        "severity": "hairpin",
+        "streetViewLink": "https://www.google.com/maps/@19.2345,73.1234,3a,75y,90h",
+        "environmentalFactors": {
+          "visibility": "limited",
+          "roadSurface": "fair",
+          "bankingAngle": 5
+        }
+      }
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Blind Spots -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/routes/:id/blind-spots</strong>
+                                </div>
+                                <small class="text-muted">Get blind spots data</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="blind-spots-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#blind-spots-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="blind-spots-details" class="accordion-collapse collapse" data-bs-parent="#blind-spots-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Query Parameters:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>spotType</td>
+                                                                <td>string</td>
+                                                                <td>all, crest, curve, intersection, obstruction</td>
+                                                                <td>all</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>riskLevel</td>
+                                                                <td>string</td>
+                                                                <td>all, low, medium, high, critical</td>
+                                                                <td>all</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('blind-spots-curl')">Copy</button>
+                                                    <pre class="code-block" id="blind-spots-curl">curl -X GET "http://localhost:3000/api/routes/64f5e8b2c9a1b2c3d4e5f6g7/blind-spots?spotType=crest" \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express"
+    },
+    "summary": {
+      "totalBlindSpots": 18,
+      "averageRiskScore": 6.8,
+      "maxRiskScore": 9.2,
+      "criticalSpots": 6,
+      "typeBreakdown": {
+        "crest": 8,
+        "curve": 6,
+        "obstruction": 4
+      },
+      "averageVisibilityDistance": 75.5
+    },
+    "blindSpots": [
+      {
+        "id": "64f5e8b2c9a1b2c3d4e5f6g8",
+        "coordinates": {
+          "latitude": 19.1567,
+          "longitude": 73.2891
+        },
+        "distanceFromStart": 67.8,
+        "spotType": "crest",
+        "visibilityDistance": 45,
+        "riskScore": 9.2,
+        "severityLevel": "critical",
+        "satelliteViewLink": "https://www.google.com/maps/@19.1567,73.2891,200m/data=!3m1!1e3",
+        "recommendations": [
+          "CRITICAL: Reduce speed to 20-30 km/h when approaching this area",
+          "Use horn/signal to alert other vehicles of your presence"
+        ]
+      }
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visibility Statistics -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/routes/:id/visibility-stats</strong>
+                                </div>
+                                <small class="text-muted">Get comprehensive visibility statistics</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="visibility-stats-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#visibility-stats-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="visibility-stats-details" class="accordion-collapse collapse" data-bs-parent="#visibility-stats-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('visibility-stats-curl')">Copy</button>
+                                                    <pre class="code-block" id="visibility-stats-curl">curl -X GET http://localhost:3000/api/routes/64f5e8b2c9a1b2c3d4e5f6g7/visibility-stats \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7,
+      "terrain": "mixed"
+    },
+    "overallStatistics": {
+      "totalVisibilityPoints": 52,
+      "criticalPoints": 14,
+      "averageRiskScore": 6.5,
+      "maxRiskScore": 9.2,
+      "visibilityDensity": 0.35
+    },
+    "sharpTurns": {
+      "total": 34,
+      "averageRiskScore": 6.2,
+      "critical": 8,
+      "severityBreakdown": {
+        "hairpin": 3,
+        "sharp": 12,
+        "moderate": 15,
+        "gentle": 4
+      },
+      "density": 0.23
+    },
+    "blindSpots": {
+      "total": 18,
+      "averageRiskScore": 6.8,
+      "critical": 6,
+      "typeBreakdown": {
+        "crest": 8,
+        "curve": 6,
+        "obstruction": 4
+      },
+      "averageVisibilityDistance": 75.5,
+      "density": 0.12
+    },
+    "riskAssessment": {
+      "overallRiskLevel": "HIGH",
+      "primaryRiskFactors": [
+        {
+          "factor": "Critical Blind Spots",
+          "count": 6,
+          "severity": "HIGH",
+          "description": "6 blind spots with severely limited visibility"
+        }
+      ]
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Critical Visibility Points -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/routes/:id/critical-visibility-points</strong>
+                                </div>
+                                <small class="text-muted">Get only critical visibility points</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="critical-visibility-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#critical-visibility-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="critical-visibility-details" class="accordion-collapse collapse" data-bs-parent="#critical-visibility-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Query Parameters:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>riskThreshold</td>
+                                                                <td>float</td>
+                                                                <td>Risk score threshold (1-10)</td>
+                                                                <td>7.0</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('critical-visibility-curl')">Copy</button>
+                                                    <pre class="code-block" id="critical-visibility-curl">curl -X GET "http://localhost:3000/api/routes/64f5e8b2c9a1b2c3d4e5f6g7/critical-visibility-points?riskThreshold=8.0" \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7
+    },
+    "filterCriteria": {
+      "riskThreshold": 8.0,
+      "description": "Points with risk score ≥ 8.0"
+    },
+    "criticalPoints": [
+      {
+        "id": "64f5e8b2c9a1b2c3d4e5f6g7",
+        "type": "sharp_turn",
+        "coordinates": {
+          "latitude": 19.2345,
+          "longitude": 73.1234
+        },
+        "distanceFromStart": 45.6,
+        "riskScore": 8.9,
+        "severity": "hairpin",
+        "recommendations": [
+          "CRITICAL: Reduce speed to 25-35 km/h",
+          "Use convoy travel with constant communication"
+        ]
+      },
+      {
+        "id": "64f5e8b2c9a1b2c3d4e5f6g8",
+        "type": "blind_spot",
+        "coordinates": {
+          "latitude": 19.1567,
+          "longitude": 73.2891
+        },
+        "distanceFromStart": 67.8,
+        "riskScore": 9.2,
+        "severity": "critical",
+        "recommendations": [
+          "CRITICAL: Reduce speed to 20-30 km/h",
+          "Use horn/signal to alert other vehicles"
+        ]
+      }
+    ],
+    "summary": {
+      "totalCriticalPoints": 14,
+      "criticalTurns": 8,
+      "criticalBlindSpots": 6,
+      "highestRiskScore": 9.2,
+      "averageRiskScore": 8.4,
+      "criticalDensity": 0.09
+    },
+    "urgentRecommendations": [
+      "Brief all drivers on exact locations before departure",
+      "Reduce speed to 25-35 km/h at all critical points",
+      "Use convoy travel with constant communication"
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted">This is Part 3 of the API Documentation. Continue to Part 4 for Network Coverage, Road Conditions, PDF Generation, and Image Management APIs.</p>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary">← Part 2</button>
+                        <button class="btn btn-primary">Part 3</button>
+                        <button class="btn btn-outline-primary">Part 4 →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+        <!-- Network Coverage Section -->
+                <div id="network" class="api-section">
+                    <h2 class="section-header"><i class="fas fa-signal"></i> Network Coverage</h2>
+                    <div class="p-4">
+                        <p class="mb-4">Analyze cellular network coverage, dead zones, and communication risks along routes.</p>
+
+                        <!-- Analyze Network Coverage -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/network-coverage/routes/:routeId/analyze</strong>
+                                </div>
+                                <small class="text-muted">Analyze network coverage for route</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="network-analyze-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#network-analyze-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="network-analyze-details" class="accordion-collapse collapse" data-bs-parent="#network-analyze-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('network-analyze-curl')">Copy</button>
+                                                    <pre class="code-block" id="network-analyze-curl">curl -X POST http://localhost:3000/api/network-coverage/routes/64f5e8b2c9a1b2c3d4e5f6g7/analyze \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Network coverage analysis completed successfully",
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7
+    },
+    "coverageAnalysis": {
+      "totalAnalysisPoints": 156,
+      "averageSignalStrength": 6.8,
+      "deadZones": {
+        "total": 3,
+        "critical": 1,
+        "severe": 2,
+        "totalDuration": 45
+      },
+      "operatorCoverage": {
+        "airtel": {
+          "averageCoverage": 85,
+          "deadZones": 2
+        },
+        "jio": {
+          "averageCoverage": 92,
+          "deadZones": 1
+        },
+        "vi": {
+          "averageCoverage": 78,
+          "deadZones": 4
+        },
+        "bsnl": {
+          "averageCoverage": 71,
+          "deadZones": 5
+        }
+      },
+      "communicationRisk": 6.2,
+      "emergencyRisk": 7.1
+    },
+    "recommendations": [
+      "Install satellite communication for 3 dead zones",
+      "Primary operator recommendation: Jio (92% coverage)",
+      "Carry backup communication devices"
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Network Overview -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/network-coverage/routes/:routeId/overview</strong>
+                                </div>
+                                <small class="text-muted">Get network coverage overview</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="network-overview-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#network-overview-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="network-overview-details" class="accordion-collapse collapse" data-bs-parent="#network-overview-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('network-overview-curl')">Copy</button>
+                                                    <pre class="code-block" id="network-overview-curl">curl -X GET http://localhost:3000/api/network-coverage/routes/64f5e8b2c9a1b2c3d4e5f6g7/overview \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7,
+      "terrain": "mixed"
+    },
+    "coverageOverview": {
+      "totalAnalysisPoints": 156,
+      "deadZones": 3,
+      "deadZonePercentage": 2,
+      "averageSignalStrength": 6.8,
+      "communicationRisk": 6.2,
+      "riskLevel": "MEDIUM"
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Dead Zones -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/network-coverage/routes/:routeId/dead-zones</strong>
+                                </div>
+                                <small class="text-muted">Get all dead zones</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="dead-zones-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dead-zones-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="dead-zones-details" class="accordion-collapse collapse" data-bs-parent="#dead-zones-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Query Parameters:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>severity</td>
+                                                                <td>string</td>
+                                                                <td>critical, severe, moderate, minor</td>
+                                                                <td>all</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>includeDetails</td>
+                                                                <td>boolean</td>
+                                                                <td>true, false</td>
+                                                                <td>true</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('dead-zones-curl')">Copy</button>
+                                                    <pre class="code-block" id="dead-zones-curl">curl -X GET "http://localhost:3000/api/network-coverage/routes/64f5e8b2c9a1b2c3d4e5f6g7/dead-zones?severity=critical" \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express"
+    },
+    "statistics": {
+      "total": 3,
+      "filtered": 1,
+      "bySeverity": {
+        "critical": 1,
+        "severe": 2,
+        "moderate": 0,
+        "minor": 0
+      },
+      "totalDuration": 45,
+      "averageRadius": 2500
+    },
+    "deadZones": [
+      {
+        "location": {
+          "latitude": 19.1234,
+          "longitude": 73.5678,
+          "distanceFromStart": 78.5
+        },
+        "severity": "critical",
+        "duration": 15,
+        "radius": 3000,
+        "terrain": "mountainous",
+        "emergencyRisk": 9.2,
+        "operatorCoverage": {
+          "airtel": 0,
+          "jio": 0,
+          "vi": 0,
+          "bsnl": 0
+        },
+        "recommendations": [
+          "CRITICAL: Use satellite communication",
+          "Inform control room before entering area",
+          "Carry emergency positioning beacon"
+        ]
+      }
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Operator Comparison -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/network-coverage/routes/:routeId/operator-comparison</strong>
+                                </div>
+                                <small class="text-muted">Compare all operators</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="operator-comparison-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#operator-comparison-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="operator-comparison-details" class="accordion-collapse collapse" data-bs-parent="#operator-comparison-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('operator-comparison-curl')">Copy</button>
+                                                    <pre class="code-block" id="operator-comparison-curl">curl -X GET http://localhost:3000/api/network-coverage/routes/64f5e8b2c9a1b2c3d4e5f6g7/operator-comparison \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express"
+    },
+    "operatorComparison": {
+      "airtel": {
+        "averageCoverage": 85,
+        "averageSignal": 7.2,
+        "deadZones": 2,
+        "reliability": "good"
+      },
+      "jio": {
+        "averageCoverage": 92,
+        "averageSignal": 8.1,
+        "deadZones": 1,
+        "reliability": "excellent"
+      },
+      "vi": {
+        "averageCoverage": 78,
+        "averageSignal": 6.8,
+        "deadZones": 4,
+        "reliability": "fair"
+      },
+      "bsnl": {
+        "averageCoverage": 71,
+        "averageSignal": 6.2,
+        "deadZones": 5,
+        "reliability": "poor"
+      }
+    },
+    "rankings": {
+      "best": "JIO",
+      "worst": "BSNL",
+      "rankings": [
+        {
+          "operator": "JIO",
+          "score": 87,
+          "averageCoverage": 92,
+          "averageSignal": 8.1,
+          "deadZones": 1
+        },
+        {
+          "operator": "AIRTEL",
+          "score": 78,
+          "averageCoverage": 85,
+          "averageSignal": 7.2,
+          "deadZones": 2
+        }
+      ]
+    },
+    "recommendations": [
+      {
+        "priority": "HIGH",
+        "category": "primary_operator",
+        "recommendation": "Primary: JIO (best overall coverage)",
+        "reason": "Highest combined score of 87/100"
+      },
+      {
+        "priority": "MEDIUM",
+        "category": "redundancy",
+        "recommendation": "Use multiple SIM cards for redundancy",
+        "reason": "Different operators have varying coverage patterns"
+      }
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Road Conditions Section -->
+                <div id="road-conditions" class="api-section">
+                    <h2 class="section-header"><i class="fas fa-road"></i> Enhanced Road Conditions</h2>
+                    <div class="p-4">
+                        <p class="mb-4">Analyze road conditions using multiple API sources with real-time data integration.</p>
+
+                        <!-- Analyze Road Conditions -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/enhanced-road-conditions/routes/:routeId/analyze</strong>
+                                </div>
+                                <small class="text-muted">Analyze enhanced road conditions</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="road-analyze-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#road-analyze-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="road-analyze-details" class="accordion-collapse collapse" data-bs-parent="#road-analyze-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Request Body:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('road-analyze-body')">Copy</button>
+                                                    <pre class="code-block" id="road-analyze-body">{
+  "forceRefresh": false
+}</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('road-analyze-curl')">Copy</button>
+                                                    <pre class="code-block" id="road-analyze-curl">curl -X POST http://localhost:3000/api/enhanced-road-conditions/routes/64f5e8b2c9a1b2c3d4e5f6g7/analyze \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"forceRefresh": false}'</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Enhanced road conditions analysis completed successfully",
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7,
+      "terrain": "mixed"
+    },
+    "analysisResults": {
+      "totalSegments": 156,
+      "segmentsAnalyzed": 156,
+      "dataQuality": {
+        "level": "excellent",
+        "score": 92,
+        "apiSuccessRate": 89
+      },
+      "roadConditionsSummary": {
+        "averageRiskScore": 5.8,
+        "overallRiskLevel": "MEDIUM",
+        "issuesDetected": {
+          "poorSurface": 23,
+          "construction": 5,
+          "potholes": 12
+        }
+      },
+      "apiIntegration": {
+        "googleRoadsAPI": "SUCCESS",
+        "tomtomAPI": "SUCCESS", 
+        "hereAPI": "SUCCESS",
+        "mapboxAPI": "SUCCESS"
+      }
+    },
+    "enhancementInfo": {
+      "version": "Enhanced_v3.0",
+      "multiApiIntegration": true,
+      "apiSources": ["Google Roads API", "TomTom Map API", "HERE Map Attributes API"],
+      "realDataOnly": true
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Road Conditions Overview -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/enhanced-road-conditions/routes/:routeId/overview</strong>
+                                </div>
+                                <small class="text-muted">Get road conditions overview</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="road-overview-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#road-overview-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="road-overview-details" class="accordion-collapse collapse" data-bs-parent="#road-overview-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('road-overview-curl')">Copy</button>
+                                                    <pre class="code-block" id="road-overview-curl">curl -X GET http://localhost:3000/api/enhanced-road-conditions/routes/64f5e8b2c9a1b2c3d4e5f6g7/overview \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7,
+      "terrain": "mixed"
+    },
+    "roadConditionsSummary": {
+      "totalSegments": 156,
+      "averageRiskScore": 5.8,
+      "overallRiskLevel": "MEDIUM",
+      "issuesDetected": {
+        "poorSurface": 23,
+        "construction": 5,
+        "potholes": 12
+      },
+      "roadTypeBreakdown": {
+        "highway": 89,
+        "state": 45,
+        "district": 18,
+        "rural": 4
+      },
+      "surfaceQualityBreakdown": {
+        "excellent": 45,
+        "good": 67,
+        "fair": 21,
+        "poor": 18,
+        "critical": 5
+      }
+    },
+    "quickInsights": {
+      "overallCondition": "Good - Minor road condition issues",
+      "primaryConcerns": [
+        "23 segments with poor surface quality",
+        "5 construction zones",
+        "12 areas with potential potholes"
+      ],
+      "travelRecommendation": "PROCEED WITH STANDARD SAFETY MEASURES"
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Road Segments -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/enhanced-road-conditions/routes/:routeId/segments</strong>
+                                </div>
+                                <small class="text-muted">Get detailed road segments</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="road-segments-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#road-segments-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="road-segments-details" class="accordion-collapse collapse" data-bs-parent="#road-segments-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Query Parameters:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>riskLevel</td>
+                                                                <td>string</td>
+                                                                <td>all, low, medium, high</td>
+                                                                <td>all</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>roadType</td>
+                                                                <td>string</td>
+                                                                <td>all, highway, state, district, rural</td>
+                                                                <td>all</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>surfaceQuality</td>
+                                                                <td>string</td>
+                                                                <td>all, excellent, good, fair, poor, critical</td>
+                                                                <td>all</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>limit</td>
+                                                                <td>integer</td>
+                                                                <td>1-100</td>
+                                                                <td>50</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>offset</td>
+                                                                <td>integer</td>
+                                                                <td>Starting position</td>
+                                                                <td>0</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('road-segments-curl')">Copy</button>
+                                                    <pre class="code-block" id="road-segments-curl">curl -X GET "http://localhost:3000/api/enhanced-road-conditions/routes/64f5e8b2c9a1b2c3d4e5f6g7/segments?riskLevel=high&limit=20" \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express"
+    },
+    "filters": {
+      "riskLevel": "high",
+      "applied": {
+        "routeId": "64f5e8b2c9a1b2c3d4e5f6g7",
+        "riskScore": {"$gte": 7}
+      }
+    },
+    "segments": [
+      {
+        "id": "64f5e8b2c9a1b2c3d4e5f6g8",
+        "coordinates": {
+          "latitude": 19.1234,
+          "longitude": 73.5678
+        },
+        "roadCharacteristics": {
+          "type": "state",
+          "surfaceQuality": "poor",
+          "width": 6.5,
+          "lanes": 2
+        },
+        "riskAssessment": {
+          "score": 7.8,
+          "level": "HIGH",
+          "hasPotholes": true,
+          "underConstruction": false
+        },
+        "dataQuality": {
+          "confidence": 0.89,
+          "dataQuality": "high"
+        },
+        "segmentIndex": 45
+      }
+    ],
+    "pagination": {
+      "total": 23,
+      "limit": 20,
+      "offset": 0,
+      "hasMore": true
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Risk Assessment -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/enhanced-road-conditions/routes/:routeId/risk-assessment</strong>
+                                </div>
+                                <small class="text-muted">Get detailed risk assessment</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="road-risk-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#road-risk-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="road-risk-details" class="accordion-collapse collapse" data-bs-parent="#road-risk-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('road-risk-curl')">Copy</button>
+                                                    <pre class="code-block" id="road-risk-curl">curl -X GET http://localhost:3000/api/enhanced-road-conditions/routes/64f5e8b2c9a1b2c3d4e5f6g7/risk-assessment \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7
+    },
+    "riskAssessment": {
+      "overallRiskScore": 5.8,
+      "riskLevel": "MEDIUM",
+      "riskFactors": {
+        "surfaceConditions": 6.2,
+        "roadInfrastructure": 5.4,
+        "constructionImpact": 7.1,
+        "maintenanceLevel": 5.6
+      },
+      "recommendations": [
+        "Monitor construction zones for delays",
+        "Check vehicle suspension before travel",
+        "Reduce speed in poor surface areas",
+        "Carry emergency repair kit"
+      ]
+    },
+    "criticalFindings": {
+      "highRiskSegments": 23,
+      "poorSurfaceSegments": 23,
+      "constructionZones": 5,
+      "potholeAreas": 12
+    },
+    "highRiskSegments": [
+      {
+        "coordinates": {
+          "latitude": 19.1234,
+          "longitude": 73.5678
+        },
+        "riskScore": 7.8,
+        "issues": {
+          "surfaceQuality": "poor",
+          "hasPotholes": true,
+          "underConstruction": false,
+          "roadType": "state"
+        },
+        "segmentIndex": 45
+      }
+    ],
+    "routeGrading": "C",
+    "comparisonMetrics": {
+      "betterThan": 65,
+      "averageForTerrain": 6.2
+    }
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PDF Generation Section -->
+                <div id="pdf" class="api-section">
+                    <h2 class="section-header"><i class="fas fa-file-pdf"></i> PDF Generation</h2>
+                    <div class="p-4">
+                        <p class="mb-4">Generate comprehensive HPCL reports with dynamic data integration.</p>
+
+                        <!-- Generate Title Page -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/pdf/routes/:routeId/title-page</strong>
+                                </div>
+                                <small class="text-muted">Generate HPCL title page PDF</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="pdf-title-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pdf-title-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="pdf-title-details" class="accordion-collapse collapse" data-bs-parent="#pdf-title-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Query Parameters:</h6>
+                                                <div class="table-container">
+                                                    <table class="table table-sm">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>download</td>
+                                                                <td>boolean</td>
+                                                                <td>true, false</td>
+                                                                <td>true</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>filename</td>
+                                                                <td>string</td>
+                                                                <td>Custom filename</td>
+                                                                <td>auto-generated</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('pdf-title-curl')">Copy</button>
+                                                    <pre class="code-block" id="pdf-title-curl">curl -X GET "http://localhost:3000/api/pdf/routes/64f5e8b2c9a1b2c3d4e5f6g7/title-page?download=true" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  --output "hpcl-route-analysis.pdf"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response (when download=false):</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "PDF generated successfully",
+  "data": {
+    "filename": "HPCL-Mumbai-Pune-Express-Analysis-1704448800001.pdf",
+    "downloadUrl": "/api/pdf/download/HPCL-Mumbai-Pune-Express-Analysis-1704448800001.pdf",
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7
+    },
+    "analysisData": {
+      "totalDataPoints": 912,
+      "criticalPoints": 14,
+      "riskLevel": "HIGH",
+      "dataQuality": "excellent"
+    },
+    "generatedAt": "2024-01-15T12:00:00.000Z"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Generate Complete Report -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/pdf/routes/:routeId/complete-report</strong>
+                                </div>
+                                <small class="text-muted">Generate complete multi-page report</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="pdf-complete-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pdf-complete-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="pdf-complete-details" class="accordion-collapse collapse" data-bs-parent="#pdf-complete-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Request Body:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('pdf-complete-body')">Copy</button>
+                                                    <pre class="code-block" id="pdf-complete-body">{
+  "includePages": ["title", "overview", "safety", "risks", "recommendations"],
+  "format": "pdf",
+  "quality": "high"
+}</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('pdf-complete-curl')">Copy</button>
+                                                    <pre class="code-block" id="pdf-complete-curl">curl -X POST http://localhost:3000/api/pdf/routes/64f5e8b2c9a1b2c3d4e5f6g7/complete-report \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "includePages": ["title", "overview", "safety", "risks", "recommendations"],
+    "format": "pdf", 
+    "quality": "high"
+  }'</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Complete HPCL report generated successfully",
+  "data": {
+    "filename": "HPCL-Complete-Report-Mumbai-Pune-Express-1704448800001.pdf",
+    "downloadUrl": "/api/pdf/download/HPCL-Complete-Report-Mumbai-Pune-Express-1704448800001.pdf",
+    "reportDetails": {
+      "totalPages": 5,
+      "sections": [
+        "Route Overview & Statistics",
+        "Safety Analysis & Compliance", 
+        "Risk Assessment & Critical Points",
+        "Safety Recommendations & Action Plan"
+      ],
+      "format": "pdf",
+      "quality": "high"
+    },
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "totalDistance": 148.7,
+      "riskLevel": "HIGH"
+    },
+    "analysisData": {
+      "totalDataPoints": 912,
+      "criticalPoints": 14,
+      "dataQuality": "excellent"
+    },
+    "generatedAt": "2024-01-15T12:00:00.000Z"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Check PDF Status -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/pdf/routes/:routeId/status</strong>
+                                </div>
+                                <small class="text-muted">Check PDF generation readiness</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="pdf-status-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pdf-status-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="pdf-status-details" class="accordion-collapse collapse" data-bs-parent="#pdf-status-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('pdf-status-curl')">Copy</button>
+                                                    <pre class="code-block" id="pdf-status-curl">curl -X GET http://localhost:3000/api/pdf/routes/64f5e8b2c9a1b2c3d4e5f6g7/status \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "routeInfo": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express",
+      "fromName": "Mumbai Central",
+      "toName": "Pune Junction"
+    },
+    "pdfGenerationReadiness": {
+      "canGeneratePDF": true,
+      "dataCompleteness": 92,
+      "recommendations": []
+    },
+    "dataAvailability": {
+      "basicRouteData": true,
+      "riskAssessment": true,
+      "visibilityAnalysis": true,
+      "networkCoverage": true,
+      "roadConditions": true
+    },
+    "analysisMetrics": {
+      "totalDataPoints": 912,
+      "criticalPoints": 14,
+      "dataQuality": {
+        "level": "excellent",
+        "score": 92
+      }
+    },
+    "availableReportTypes": [
+      "title-page",
+      "complete-report"
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Management Section -->
+                <div id="images" class="api-section">
+                    <h2 class="section-header"><i class="fas fa-images"></i> Image Management</h2>
+                    <div class="p-4">
+                        <p class="mb-4">Download and manage images for sharp turns with database integration.</p>
+
+                        <!-- Download All Images -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/sharp-turn-images/routes/:routeId/download-all-images</strong>
+                                </div>
+                                <small class="text-muted">Download all sharp turn images</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="images-download-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#images-download-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="images-download-details" class="accordion-collapse collapse" data-bs-parent="#images-download-accordion">
+                                            <div class="accordion-body">
+                                                <h6>Request Body:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('images-download-body')">Copy</button>
+                                                    <pre class="code-block" id="images-download-body">{
+  "imageTypes": ["street", "satellite", "roadmap"],
+  "quality": "high",
+  "updateDatabase": true
+}</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('images-download-curl')">Copy</button>
+                                                    <pre class="code-block" id="images-download-curl">curl -X POST http://localhost:3000/api/sharp-turn-images/routes/64f5e8b2c9a1b2c3d4e5f6g7/download-all-images \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "imageTypes": ["street", "satellite", "roadmap"],
+    "quality": "high",
+    "updateDatabase": true
+  }'</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Enhanced sharp turn images downloaded and database updated successfully",
+  "data": {
+    "route": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express"
+    },
+    "downloadSummary": {
+      "totalTurns": 34,
+      "successful": 32,
+      "failed": 2,
+      "successRate": 94
+    },
+    "databaseUpdateSummary": {
+      "enabled": true,
+      "successful": 32,
+      "failed": 0,
+      "updateRate": 100
+    },
+    "downloadPath": "./downloads/sharp-turn-images/RT1704448800001ABC",
+    "timestamp": "2024-01-15T12:00:00.000Z",
+    "imageTypes": ["street", "satellite", "roadmap"],
+    "quality": "high"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Check Image Status -->
+                        <div class="endpoint-card card method-get">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">GET</span>
+                                    <strong>/api/sharp-turn-images/routes/:routeId/image-status</strong>
+                                </div>
+                                <small class="text-muted">Check image download status</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="images-status-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#images-status-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="images-status-details" class="accordion-collapse collapse" data-bs-parent="#images-status-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('images-status-curl')">Copy</button>
+                                                    <pre class="code-block" id="images-status-curl">curl -X GET http://localhost:3000/api/sharp-turn-images/routes/64f5e8b2c9a1b2c3d4e5f6g7/image-status \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "data": {
+    "route": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express"
+    },
+    "summary": {
+      "totalTurns": 34,
+      "turnsWithDatabaseImages": 32,
+      "turnsWithFileSystemImages": 32,
+      "turnsWithBoth": 32,
+      "turnsWithNeither": 2
+    },
+    "turns": [
+      {
+        "turnNumber": 1,
+        "turnId": "64f5e8b2c9a1b2c3d4e5f6g8",
+        "coordinates": {
+          "latitude": 19.2345,
+          "longitude": 73.1234
+        },
+        "riskScore": 8.9,
+        "severity": "hairpin",
+        "database": {
+          "streetView": true,
+          "satellite": true,
+          "roadmap": true,
+          "any": true
+        },
+        "fileSystem": {
+          "streetView": true,
+          "satellite": true,
+          "roadmap": true,
+          "any": true
+        },
+        "status": "COMPLETE - Both database and files"
+      }
+    ]
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sync Database with Files -->
+                        <div class="endpoint-card card method-post">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="method-badge">POST</span>
+                                    <strong>/api/sharp-turn-images/routes/:routeId/sync-database-with-files</strong>
+                                </div>
+                                <small class="text-muted">Sync database with existing files</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="images-sync-accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#images-sync-details">
+                                                View Details
+                                            </button>
+                                        </h2>
+                                        <div id="images-sync-details" class="accordion-collapse collapse" data-bs-parent="#images-sync-accordion">
+                                            <div class="accordion-body">
+                                                <h6>CURL Example:</h6>
+                                                <div class="position-relative">
+                                                    <button class="copy-btn" onclick="copyToClipboard('images-sync-curl')">Copy</button>
+                                                    <pre class="code-block" id="images-sync-curl">curl -X POST http://localhost:3000/api/sharp-turn-images/routes/64f5e8b2c9a1b2c3d4e5f6g7/sync-database-with-files \
+  -H "Authorization: Bearer YOUR_TOKEN"</pre>
+                                                </div>
+
+                                                <h6 class="mt-3">Response:</h6>
+                                                <div class="response-example">
+                                                    <span class="status-badge status-200">200 OK</span>
+                                                    <pre class="mt-2 mb-0">{
+  "success": true,
+  "message": "Database synced with file system successfully",
+  "data": {
+    "route": {
+      "routeId": "RT1704448800001ABC",
+      "routeName": "Mumbai to Pune Express"
+    },
+    "syncResults": {
+      "successful": 32,
+      "failed": 0,
+      "skipped": 2,
+      "errors": []
+    },
+    "downloadDirectory": "./downloads/sharp-turn-images/RT1704448800001ABC"
+  }
+}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Codes & Status Codes Section -->
+                <div class="api-section">
+                    <h2 class="section-header"><i class="fas fa-exclamation-circle"></i> HTTP Status Codes & Error Handling</h2>
+                    <div class="p-4">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Status Code</th>
+                                        <th>Description</th>
+                                        <th>Common Scenarios</th>
+                                        <th>Response Format</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="status-badge status-200">200</span></td>
+                                        <td>OK</td>
+                                        <td>Successful GET requests</td>
+                                        <td>{"success": true, "data": {...}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="status-badge status-201">201</span></td>
+                                        <td>Created</td>
+                                        <td>Successful POST requests</td>
+                                        <td>{"success": true, "message": "...", "data": {...}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="status-badge status-400">400</span></td>
+                                        <td>Bad Request</td>
+                                        <td>Validation errors, missing parameters</td>
+                                        <td>{"success": false, "message": "...", "errors": [...]}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="status-badge status-401">401</span></td>
+                                        <td>Unauthorized</td>
+                                        <td>Missing/invalid authentication token</td>
+                                        <td>{"success": false, "message": "Access denied"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="status-badge status-404">404</span></td>
+                                        <td>Not Found</td>
+                                        <td>Route/resource doesn't exist</td>
+                                        <td>{"success": false, "message": "Not found"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="status-badge status-500">500</span></td>
+                                        <td>Internal Server Error</td>
+                                        <td>Server errors, API failures</td>
+                                        <td>{"success": false, "message": "Server error"}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h5 class="mt-4">Common Error Examples:</h5>
+                        <div class="response-example">
+                            <h6>Validation Error (400):</h6>
+                            <pre>{
+  "success": false,
+  "message": "Validation errors",
+  "errors": [
+    {
+      "field": "email",
+      "message": "Please provide a valid email",
+      "value": "invalid-email"
+    }
+  ]
+}</pre>
+                        </div>
+
+                        <div class="response-example">
+                            <h6>Authentication Error (401):</h6>
+                            <pre>{
+  "success": false,
+  "message": "Access denied. No token provided."
+}</pre>
+                        </div>
+
+                        <div class="response-example">
+                            <h6>Server Error (500):</h6>
+                            <pre>{
+  "success": false,
+  "message": "Error calculating route risk",
+  "error": "Database connection failed"
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Usage Guidelines -->
+                <div class="api-section">
+                    <h2 class="section-header"><i class="fas fa-info-circle"></i> API Usage Guidelines</h2>
+                    <div class="p-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-clock"></i> Rate Limiting</h5>
+                                <ul>
+                                    <li>100 requests per 15-minute window</li>
+                                    <li>Burst limit: 10 requests per second</li>
+                                    <li>Rate limit headers included in responses</li>
+                                    <li>429 status when limits exceeded</li>
+                                </ul>
+
+                                <h5 class="mt-4"><i class="fas fa-lock"></i> Authentication</h5>
+                                <ul>
+                                    <li>JWT tokens required for most endpoints</li>
+                                    <li>Tokens expire after 7 days</li>
+                                    <li>Include in Authorization header: <code>Bearer &lt;token&gt;</code></li>
+                                    <li>Refresh tokens by re-authenticating</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-database"></i> Data Persistence</h5>
+                                <ul>
+                                    <li>Routes are permanently stored</li>
+                                    <li>Soft delete for route removal</li>
+                                    <li>Analysis data cached for performance</li>
+                                    <li>Images stored locally with database links</li>
+                                </ul>
+
+                                <h5 class="mt-4"><i class="fas fa-chart-line"></i> Performance</h5>
+                                <ul>
+                                    <li>Use pagination for large datasets</li>
+                                    <li>Analysis endpoints may take 30-60 seconds</li>
+                                    <li>Images downloaded asynchronously</li>
+                                    <li>PDF generation can take 1-2 minutes</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h5><i class="fas fa-code"></i> Postman Collection</h5>
+                            <p>Import the HPCL API collection into Postman:</p>
+                            <div class="code-block">
+{
+  "info": {
+    "name": "HPCL Journey Risk Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
+            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 mb-4">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-check-circle"></i> API Documentation Complete</h5>
+                        <p class="mb-0">This completes the comprehensive API documentation for the HPCL Journey Risk Management System. All 50+ endpoints are documented with CURL examples, Postman instructions, and sample responses.</p>
+                    </div>
+                    
+                    <div class="btn-group mt-3" role="group">
+                        <button class="btn btn-outline-primary">← Part 4</button>
+                        <button class="btn btn-success">Part 5 (Complete)</button>
+                        <a href="#" class="btn btn-primary">Download Full Documentation</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Copy to clipboard functionality
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(function() {
+                // Visual feedback
+                const button = element.parentNode.querySelector('.copy-btn');
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.style.background = '#28a745';
+                
+                setTimeout(function() {
+                    button.textContent = originalText;
+                    button.style.background = '#4a5568';
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        // Smooth scrolling for table of contents
+        document.querySelectorAll('.toc a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Auto-expand first accordion in each section
+        document.addEventListener('DOMContentLoaded', function() {
+            // Highlight active section in TOC based on scroll position
+            const sections = document.querySelectorAll('.api-section');
+            const tocLinks = document.querySelectorAll('.toc a');
+            
+            function updateActiveSection() {
+                let currentSection = '';
+                const scrollPosition = window.scrollY + 100;
+                
+                sections.forEach(section => {
+                    const rect = section.getBoundingClientRect();
+                    const sectionTop = rect.top + window.scrollY;
+                    
+                    if (scrollPosition >= sectionTop) {
+                        currentSection = '#' + section.id;
+                    }
+                });
+                
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === currentSection) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', updateActiveSection);
+            updateActiveSection(); // Initial call
+        });
+
+        // Add search functionality
+        function addSearchFunctionality() {
+            const searchBox = document.createElement('div');
+            searchBox.innerHTML = `
+                <div class="search-container mb-3">
+                    <input type="text" class="form-control" id="apiSearch" placeholder="Search endpoints...">
+                </div>
+            `;
+            
+            const firstSection = document.querySelector('.api-section');
+            if (firstSection) {
+                firstSection.parentNode.insertBefore(searchBox, firstSection);
+            }
+            
+            const searchInput = document.getElementById('apiSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const endpoints = document.querySelectorAll('.endpoint-card');
+                    
+                    endpoints.forEach(endpoint => {
+                        const text = endpoint.textContent.toLowerCase();
+                        const isVisible = text.includes(searchTerm);
+                        endpoint.style.display = isVisible ? 'block' : 'none';
+                    });
+                });
+            }
+        }
+
+        // Initialize search
+        document.addEventListener('DOMContentLoaded', addSearchFunctionality);
+
+        // Back to top button
+        function addBackToTopButton() {
+            const backToTop = document.createElement('button');
+            backToTop.innerHTML = '<i class="fas fa-arrow-up"></i>';
+            backToTop.className = 'btn btn-primary btn-back-to-top';
+            backToTop.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                display: none;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            `;
+            
+            document.body.appendChild(backToTop);
+            
+            backToTop.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    backToTop.style.display = 'block';
+                } else {
+                    backToTop.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize back to top
+        document.addEventListener('DOMContentLoaded', addBackToTopButton);
+
+        // API endpoint counter
+        function countEndpoints() {
+            const endpoints = document.querySelectorAll('.endpoint-card');
+            const counter = document.createElement('div');
+            counter.className = 'alert alert-info text-center mt-3';
+            counter.innerHTML = `
+                <h6><i class="fas fa-list-ol"></i> Total API Endpoints: ${endpoints.length}</h6>
+                <small>Documented across ${document.querySelectorAll('.api-section').length} categories</small>
+            `;
+            
+            const lastSection = document.querySelector('.api-section:last-of-type');
+            if (lastSection) {
+                lastSection.after(counter);
+            }
+        }
+
+        // Initialize endpoint counter
+        document.addEventListener('DOMContentLoaded', countEndpoints);
+
+        // Print functionality
+        function addPrintButton() {
+            const printBtn = document.createElement('button');
+            printBtn.className = 'btn btn-outline-secondary me-2';
+            printBtn.innerHTML = '<i class="fas fa-print"></i> Print Documentation';
+            printBtn.onclick = function() {
+                window.print();
+            };
+            
+            const btnGroup = document.querySelector('.btn-group:last-of-type');
+            if (btnGroup) {
+                btnGroup.appendChild(printBtn);
+            }
+        }
+
+        // Initialize print button
+        document.addEventListener('DOMContentLoaded', addPrintButton);
+
+        // Download as JSON functionality
+        function downloadAPICollection() {
+            const apiCollection = {
+                info: {
+                    name: "HPCL Journey Risk Management API",
+                    description: "Complete API collection for route safety analysis",
+                    version: "2.0.0",
+                    schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+                },
+                variable: [
+                    {
+                        key: "baseUrl",
+                        value: "http://localhost:3000",
+                        type: "string"
+                    },
+                    {
+                        key: "authToken",
+                        value: "",
+                        type: "string"
+                    }
+                ],
+                item: []
+            };
+
+            // Add endpoints to collection
+            const endpoints = document.querySelectorAll('.endpoint-card');
+            endpoints.forEach((endpoint, index) => {
+                const method = endpoint.querySelector('.method-badge').textContent;
+                const url = endpoint.querySelector('strong').textContent;
+                const description = endpoint.querySelector('.text-muted').textContent;
+                
+                apiCollection.item.push({
+                    name: `${method} ${url}`,
+                    request: {
+                        method: method,
+                        header: [
+                            {
+                                key: "Authorization",
+                                value: "Bearer {{authToken}}",
+                                type: "text"
+                            },
+                            {
+                                key: "Content-Type",
+                                value: "application/json",
+                                type: "text"
+                            }
+                        ],
+                        url: {
+                            raw: "{{baseUrl}}" + url,
+                            host: ["{{baseUrl}}"],
+                            path: url.split('/').filter(p => p)
+                        },
+                        description: description
+                    }
+                });
+            });
+
+            // Download the collection
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(apiCollection, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "HPCL-API-Collection.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // Add download button
+        function addDownloadButton() {
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'btn btn-success';
+            downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Postman Collection';
+            downloadBtn.onclick = downloadAPICollection;
+            
+            const btnGroup = document.querySelector('.btn-group:last-of-type');
+            if (btnGroup) {
+                btnGroup.appendChild(downloadBtn);
+            }
+        }
+
+        // Initialize download button
+        document.addEventListener('DOMContentLoaded', addDownloadButton);
+
+        // Environment setup helper
+        function showEnvironmentSetup() {
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div class="modal fade" id="setupModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Environment Setup Guide</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <h6>1. Clone and Setup</h6>
+                                <pre class="code-block">git clone &lt;repository&gt;
+cd hpcl-journey-risk-management
+npm install
+cp .env.example .env</pre>
+
+                                <h6>2. Configure Environment Variables</h6>
+                                <pre class="code-block"># Required API Keys
+GOOGLE_MAPS_API_KEY=your_google_maps_key
+TOMTOM_API_KEY=your_tomtom_key
+HERE_API_KEY=your_here_key
+
+# Database
+MONGODB_URI=mongodb://127.0.0.1:27017/hpcl_journey_risk
+
+# JWT
+JWT_SECRET=your_jwt_secret_key</pre>
+
+                                <h6>3. Start the Server</h6>
+                                <pre class="code-block">npm run dev</pre>
+
+                                <h6>4. Test Authentication</h6>
+                                <pre class="code-block">curl -X POST http://localhost:3000/api/auth/register \\
+  -H "Content-Type: application/json" \\
+  -d '{"username":"test","email":"test@hpcl.com","password":"Test123"}'</pre>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const setupBtn = document.createElement('button');
+            setupBtn.className = 'btn btn-info me-2';
+            setupBtn.innerHTML = '<i class="fas fa-cog"></i> Setup Guide';
+            setupBtn.onclick = function() {
+                new bootstrap.Modal(document.getElementById('setupModal')).show();
+            };
+            
+            const btnGroup = document.querySelector('.btn-group:last-of-type');
+            if (btnGroup) {
+                btnGroup.appendChild(setupBtn);
+            }
+        }
+
+        // Initialize setup guide
+        document.addEventListener('DOMContentLoaded', showEnvironmentSetup);
+
+        // Add CSS for active TOC links
+        const style = document.createElement('style');
+        style.textContent = `
+            .toc a.active {
+                color: #2a5298 !important;
+                font-weight: bold;
+                text-decoration: underline;
+            }
+            
+            .btn-back-to-top:hover {
+                transform: translateY(-2px);
+                transition: transform 0.2s ease;
+            }
+            
+            .search-container {
+                position: sticky;
+                top: 20px;
+                z-index: 100;
+                background: white;
+                padding: 1rem;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+            
+            @media print {
+                .toc, .btn-group, .search-container, .btn-back-to-top {
+                    display: none !important;
+                }
+                .api-section {
+                    break-inside: avoid;
+                    page-break-inside: avoid;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('✅ HPCL API Documentation loaded successfully');
+        console.log('📚 Total endpoints documented:', document.querySelectorAll('.endpoint-card').length);
+        console.log('🔧 Interactive features: Copy, Search, Print, Download');
+    </script>
+</body>
+</html>

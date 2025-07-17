@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Risk Calculation Details</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .risk-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        .risk-table th, .risk-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .risk-table th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        .risk-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .risk-table tr:hover {
+            background-color: #f1f7fd;
+        }
+        .risk-grade {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 20px;
+        }
+        .grade-A { background-color: #2ecc71; color: white; }
+        .grade-B { background-color: #f1c40f; color: #333; }
+        .grade-C { background-color: #e67e22; color: white; }
+        .grade-D { background-color: #e74c3c; color: white; }
+        .grade-F { background-color: #c0392b; color: white; }
+        .weight-cell {
+            font-weight: bold;
+            text-align: center;
+        }
+        .critical { color: #e74c3c; font-weight: bold; }
+        .high { color: #e67e22; font-weight: bold; }
+        .medium { color: #f1c40f; font-weight: bold; }
+        .low { color: #2ecc71; font-weight: bold; }
+        .formula-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        .summary-card {
+            background-color: #e8f4fc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            border-left: 5px solid #3498db;
+        }
+        .recommendations {
+            background-color: #fff8e1;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        .recommendations ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Route Risk Calculation Details</h1>
+    
+    <div class="summary-card">
+        <h2>Risk Calculation Overview</h2>
+        <p>The route risk score is calculated by evaluating 11 critical safety factors, each weighted according to their impact on overall safety. The total weighted score determines the risk grade from A (safest) to F (most dangerous).</p>
+        
+        <div class="formula-box">
+            <strong>Calculation Formula:</strong><br>
+            Total Weighted Score = Σ(Risk Score × Weight / 100)
+        </div>
+    </div>
+
+    <h2>Risk Factor Details</h2>
+    <table class="risk-table">
+        <thead>
+            <tr>
+                <th>Risk Factor</th>
+                <th>Weight</th>
+                <th>Input Data</th>
+                <th>Calculation Method</th>
+                <th>Score Range</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Road Conditions</strong></td>
+                <td class="weight-cell critical">15%</td>
+                <td>Surface quality, potholes, construction, width</td>
+                <td>
+                    <ul>
+                        <li>Critical surface: +3 points</li>
+                        <li>Poor surface: +2 points</li>
+                        <li>Potholes present: +2 points</li>
+                        <li>Construction: +3 points</li>
+                        <li>Narrow road (&lt;4m): +2 points</li>
+                    </ul>
+                    Average of all segments
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Accident-Prone Areas</strong></td>
+                <td class="weight-cell critical">15%</td>
+                <td>Accident frequency, severity</td>
+                <td>
+                    <ul>
+                        <li>&gt;20 accidents/year: +3 points</li>
+                        <li>10-20 accidents/year: +2 points</li>
+                        <li>5-10 accidents/year: +1 point</li>
+                        <li>Fatal accidents: +4 points</li>
+                        <li>Major accidents: +2 points</li>
+                    </ul>
+                    Average of all hotspots
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Sharp Turns</strong></td>
+                <td class="weight-cell high">10%</td>
+                <td>Route GPS coordinates</td>
+                <td>
+                    <ul>
+                        <li>Angle &gt;45°: Count as sharp turn</li>
+                        <li>Angle &gt;90°: +3 points</li>
+                        <li>Angle &gt;120°: +2 additional points</li>
+                        <li>Elevation change &gt;50m: +2 points</li>
+                    </ul>
+                    Average turn risk + density factor
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Blind Spots</strong></td>
+                <td class="weight-cell high">10%</td>
+                <td>Route elevation, turn angles</td>
+                <td>
+                    <ul>
+                        <li>Hill crests with &gt;20m elevation: 6+ points</li>
+                        <li>Turn angle &gt;60°: 4+ points</li>
+                        <li>Additional points for severity</li>
+                    </ul>
+                    Average of all blind spots
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Two-Way Traffic</strong></td>
+                <td class="weight-cell high">10%</td>
+                <td>Road type, terrain, distance</td>
+                <td>
+                    <ul>
+                        <li>Base risk: 5 points</li>
+                        <li>Hilly terrain: +2 points</li>
+                        <li>Rural/urban: +1 point</li>
+                        <li>National highway: -2 points</li>
+                        <li>Long distance (&gt;200km): +1 point</li>
+                    </ul>
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Traffic Density</strong></td>
+                <td class="weight-cell high">10%</td>
+                <td>Congestion level, average speed</td>
+                <td>
+                    <ul>
+                        <li>Severe congestion: 9 points</li>
+                        <li>Heavy congestion: 7 points</li>
+                        <li>Average speed &lt;20km/h: +2 points</li>
+                        <li>Average speed &lt;40km/h: +1 point</li>
+                    </ul>
+                    Average of all traffic data points
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Weather Conditions</strong></td>
+                <td class="weight-cell high">10%</td>
+                <td>Current weather, visibility, wind</td>
+                <td>
+                    <ul>
+                        <li>Stormy: 9 points</li>
+                        <li>Foggy: 8 points</li>
+                        <li>Rainy: 6 points</li>
+                        <li>Visibility &lt;1km: +3 points</li>
+                        <li>Wind &gt;50km/h: +2 points</li>
+                    </ul>
+                    Average of all weather conditions
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Emergency Services</strong></td>
+                <td class="weight-cell medium">5%</td>
+                <td>Distance to hospitals, police, fire</td>
+                <td>
+                    <ul>
+                        <li>No services: 8 points</li>
+                        <li>&gt;50km distance: +4 points</li>
+                        <li>25-50km: +2 points</li>
+                        <li>Response time &gt;30min: +2 points</li>
+                    </ul>
+                    Average coverage for all service types
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Network Coverage</strong></td>
+                <td class="weight-cell medium">5%</td>
+                <td>Terrain type, location</td>
+                <td>
+                    <ul>
+                        <li>Rural area: 7 points</li>
+                        <li>Hilly area: 6 points</li>
+                        <li>Urban area: 2 points</li>
+                    </ul>
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Amenities</strong></td>
+                <td class="weight-cell medium">5%</td>
+                <td>POIs along route</td>
+                <td>
+                    <ul>
+                        <li>Base risk: 6 points</li>
+                        <li>Major highways: -2 points</li>
+                        <li>Urban terrain: -2 points</li>
+                        <li>Rural terrain: +2 points</li>
+                    </ul>
+                </td>
+                <td>1-10</td>
+            </tr>
+            <tr>
+                <td><strong>Security Issues</strong></td>
+                <td class="weight-cell medium">5%</td>
+                <td>Crime data, area type</td>
+                <td>
+                    <ul>
+                        <li>Base risk: 4 points</li>
+                        <li>Rural area: +2 points</li>
+                        <li>Urban area: +1 point</li>
+                        <li>Long route (&gt;300km): +1 point</li>
+                    </ul>
+                </td>
+                <td>1-10</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Risk Grade Interpretation</h2>
+    <table class="risk-table">
+        <thead>
+            <tr>
+                <th>Grade</th>
+                <th>Score Range</th>
+                <th>Risk Level</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="risk-grade grade-A">A</span></td>
+                <td>0.0 - 2.0</td>
+                <td class="low">Low Risk</td>
+                <td>Route is generally safe with minimal hazards</td>
+            </tr>
+            <tr>
+                <td><span class="risk-grade grade-B">B</span></td>
+                <td>2.1 - 4.0</td>
+                <td class="medium">Low-Medium Risk</td>
+                <td>Route has some minor risk factors</td>
+            </tr>
+            <tr>
+                <td><span class="risk-grade grade-C">C</span></td>
+                <td>4.1 - 6.0</td>
+                <td class="high">Medium Risk</td>
+                <td>Route requires normal caution and attention</td>
+            </tr>
+            <tr>
+                <td><span class="risk-grade grade-D">D</span></td>
+                <td>6.1 - 8.0</td>
+                <td class="critical">High Risk</td>
+                <td>Route has significant hazards requiring extra precaution</td>
+            </tr>
+            <tr>
+                <td><span class="risk-grade grade-F">F</span></td>
+                <td>8.1 - 10.0</td>
+                <td class="critical">Critical Risk</td>
+                <td>Route has severe hazards, consider alternative routes</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Example Risk Recommendations</h2>
+    <div class="recommendations">
+        <h3>Grade <span class="risk-grade grade-A">A</span> Recommendations</h3>
+        <ul>
+            <li>Maintain normal driving practices</li>
+            <li>Follow standard safety protocols</li>
+        </ul>
+        
+        <h3>Grade <span class="risk-grade grade-C">C</span> Recommendations</h3>
+        <ul>
+            <li>Increase following distance</li>
+            <li>Check weather and traffic conditions</li>
+            <li>Ensure emergency kit is complete</li>
+        </ul>
+        
+        <h3>Grade <span class="risk-grade grade-F">F</span> Recommendations</h3>
+        <ul>
+            <li><strong>CRITICAL:</strong> Consider postponing travel if possible</li>
+            <li>If travel is necessary, arrange escort vehicles</li>
+            <li>Maintain constant GPS tracking and communication</li>
+            <li>Brief all drivers on specific hazards</li>
+            <li>Carry extra emergency supplies</li>
+        </ul>
+    </div>
+
+    <div class="summary-card">
+        <h2>Calculation Notes</h2>
+        <ul>
+            <li>All individual risk scores are clamped between 1 (minimum risk) and 10 (maximum risk)</li>
+            <li>Critical factors (road conditions, accident-prone areas) have higher weights (15%)</li>
+            <li>Medium importance factors have 5% weights</li>
+            <li>Total score is the sum of all weighted scores</li>
+            <li>Grades are determined by fixed thresholds</li>
+            <li>Recommendations are generated based on the final grade</li>
+        </ul>
+    </div>
+</body>
+</html>

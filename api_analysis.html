@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HPCL Data Collection APIs Analysis</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .api-section {
+            background: white;
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #007bff;
+        }
+        
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .api-table th, .api-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+        
+        .api-table th {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .api-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-active { 
+            background-color: #d5f5e3; 
+            color: #28b463; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .status-configured { 
+            background-color: #fdebd0; 
+            color: #d35400; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .status-missing { 
+            background-color: #fadbd8; 
+            color: #c0392b; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .code-snippet {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        
+        .usage-flow {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .flow-step {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 3px solid #ffc107;
+        }
+        
+        .highlight {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        .api-endpoint {
+            font-family: monospace;
+            background-color: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        .data-type {
+            display: inline-block;
+            background-color: #17a2b8;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗺️ HPCL Journey Risk Management</h1>
+        <h2>Data Collection APIs Analysis</h2>
+        <p>Comprehensive breakdown of external APIs used for route data collection</p>
+    </div>
+
+    <div class="api-section">
+        <h2>📡 Core Data Collection APIs</h2>
+        <p>The HPCL system uses multiple external APIs to collect comprehensive route data. Here's the detailed breakdown:</p>
+        
+        <table class="api-table">
+            <thead>
+                <tr>
+                    <th>API Service</th>
+                    <th>Primary Use</th>
+                    <th>Data Collected</th>
+                    <th>Status</th>
+                    <th>Rate Limits</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Google Maps APIs</strong></td>
+                    <td>Core mapping & places</td>
+                    <td><span class="data-type">Directions</span> <span class="data-type">Places</span> <span class="data-type">Geocoding</span> <span class="data-type">Elevation</span></td>
+                    <td><span class="status-active">ACTIVE</span></td>
+                    <td>2,500/hour</td>
+                </tr>
+                <tr>
+                    <td><strong>OpenWeatherMap API</strong></td>
+                    <td>Weather conditions</td>
+                    <td><span class="data-type">Current Weather</span> <span class="data-type">Forecasts</span> <span class="data-type">Historical</span></td>
+                    <td><span class="status-active">ACTIVE</span></td>
+                    <td>1,000/hour</td>
+                </tr>
+                <tr>
+                    <td><strong>TomTom Traffic API</strong></td>
+                    <td>Real-time traffic</td>
+                    <td><span class="data-type">Traffic Flow</span> <span class="data-type">Incidents</span> <span class="data-type">Speed Data</span></td>
+                    <td><span class="status-configured">CONFIGURED</span></td>
+                    <td>2,500/hour</td>
+                </tr>
+                <tr>
+                    <td><strong>HERE Maps API</strong></td>
+                    <td>Road attributes</td>
+                    <td><span class="data-type">Road Types</span> <span class="data-type">Speed Limits</span> <span class="data-type">Infrastructure</span></td>
+                    <td><span class="status-configured">CONFIGURED</span></td>
+                    <td>250,000/month</td>
+                </tr>
+                <tr>
+                    <td><strong>Mapbox API</strong></td>
+                    <td>Enhanced mapping</td>
+                    <td><span class="data-type">Satellite Imagery</span> <span class="data-type">Vector Maps</span> <span class="data-type">Navigation</span></td>
+                    <td><span class="status-configured">CONFIGURED</span></td>
+                    <td>50,000/month</td>
+                </tr>
+                <tr>
+                    <td><strong>Visual Crossing Weather</strong></td>
+                    <td>Historical weather</td>
+                    <td><span class="data-type">Historical Patterns</span> <span class="data-type">Climate Data</span></td>
+                    <td><span class="status-configured">CONFIGURED</span></td>
+                    <td>1,000/day</td>
+                </tr>
+                <tr>
+                    <td><strong>Tomorrow.io</strong></td>
+                    <td>Advanced weather</td>
+                    <td><span class="data-type">Microweather</span> <span class="data-type">Road Conditions</span></td>
+                    <td><span class="status-configured">CONFIGURED</span></td>
+                    <td>100/hour</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="api-section">
+        <h2>🔧 API Configuration in Environment</h2>
+        <p>The following API keys are configured in the <code>.env</code> file:</p>
+        
+        <div class="code-snippet">
+# Core APIs (Required)
+GOOGLE_MAPS_API_KEY=AIzaSyAXa6qLmUm7YEoUOqpIZF8A00663AKgq68
+OPENWEATHER_API_KEY=904f1f92432e925f1536c88b0a6c613f
+
+# Traffic & Navigation (Recommended)
+TOMTOM_API_KEY=4GMXpCknsEI6v22oQlZe5CFlV1Ev0xQu
+HERE_API_KEY=_Zmq3222RvY4Y5XspG6X4RQbOx2-QIp0C171cD3BHls
+MAPBOX_API_KEY=pk.eyJ1IjoiYW5pbDI1IiwiYSI6ImNtYmtlanhpYjBwZW4ya3F4ZnZ2NmNxNDkifQ.N0WsW5T60dxrG80rhnee0g
+
+# Weather & Environmental (Optional)
+VISUALCROSSING_API_KEY=EA9XLKA5PK3ZZLB783HUBK9W3
+TOMORROW_IO_API_KEY=dTS7pan6xLX8SfXDsYvZTAuyuSOfHsMX
+        </div>
+    </div>
+
+    <div class="api-section">
+        <h2>📊 Data Collection Service Implementation</h2>
+        <p>The enhanced data collection service (<code>dataCollectionService.js</code>) orchestrates multiple API calls:</p>
+        
+        <div class="usage-flow">
+            <h3>🔄 Data Collection Flow</h3>
+            <div class="flow-step">
+                <strong>Step 1:</strong> Route Segmentation - Divide GPS route into manageable segments
+            </div>
+            <div class="flow-step">
+                <strong>Step 2:</strong> Emergency Services - Use Google Places API to find hospitals, police, fire stations
+            </div>
+            <div class="flow-step">
+                <strong>Step 3:</strong> Fuel & Vehicle Services - Collect gas stations, repair shops, mechanics
+            </div>
+            <div class="flow-step">
+                <strong>Step 4:</strong> Weather Data - Gather current & historical weather from multiple sources
+            </div>
+            <div class="flow-step">
+                <strong>Step 5:</strong> Traffic Analysis - Real-time traffic data from TomTom/HERE APIs
+            </div>
+            <div class="flow-step">
+                <strong>Step 6:</strong> Road Conditions - Infrastructure data from mapping APIs
+            </div>
+        </div>
+    </div>
+
+    <div class="api-section">
+        <h2>🎯 Specific API Usage by Data Type</h2>
+        
+        <h3>1. Emergency Services Collection</h3>
+        <div class="code-snippet">
+// Google Places API for emergency services
+const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${type}&key=${this.googleMapsApiKey}`;
+
+// Service types collected:
+- hospital, emergency_room, clinic, pharmacy
+- police, courthouse
+- fire_station, ambulance_service
+        </div>
+
+        <h3>2. Weather Data Collection</h3>
+        <div class="code-snippet">
+// OpenWeatherMap API for current weather
+const currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${this.openWeatherApiKey}&units=metric`;
+
+// Visual Crossing for historical data
+const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${latitude},${longitude}/${dateStr}?key=${this.visualCrossingApiKey}`;
+        </div>
+
+        <h3>3. Traffic Data Collection</h3>
+        <div class="code-snippet">
+// TomTom Traffic API
+const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=${latitude},${longitude}&unit=KMPH&key=${this.tomtomApiKey}`;
+
+// Data collected: speed, congestion, incidents
+        </div>
+
+        <h3>4. Route Details & Directions</h3>
+        <div class="code-snippet">
+// Google Directions API
+let url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&key=${this.googleMapsApiKey}`;
+
+// Elevation API
+const url = `https://maps.googleapis.com/maps/api/elevation/json?locations=${locations}&key=${this.googleMapsApiKey}`;
+        </div>
+    </div>
+
+    <div class="api-section">
+        <h2>⚠️ Missing APIs & Limitations</h2>
+        <div class="highlight">
+            <h3>APIs Configured But Not Fully Utilized:</h3>
+            <ul>
+                <li><strong>Emergency Communication APIs:</strong> EMERGENCY_API_KEY, TWILIO_* - Not implemented</li>
+                <li><strong>Crime/Security Data:</strong> No specific API for crime statistics</li>
+                <li><strong>Real-time Incident APIs:</strong> Limited accident data sources</li>
+                <li><strong>Satellite Imagery Analysis:</strong> Mapbox configured but not used for road condition analysis</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="api-section">
+        <h2>📈 API Rate Limit Management</h2>
+        <table class="api-table">
+            <thead>
+                <tr>
+                    <th>API</th>
+                    <th>Rate Limit</th>
+                    <th>Current Usage Strategy</th>
+                    <th>Optimization</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Google Maps</td>
+                    <td>2,500/hour</td>
+                    <td>Sequential requests with delays</td>
+                    <td>Batch geocoding, caching</td>
+                </tr>
+                <tr>
+                    <td>OpenWeather</td>
+                    <td>1,000/hour</td>
+                    <td>One call per route segment</td>
+                    <td>Reduce segments for long routes</td>
+                </tr>
+                <tr>
+                    <td>TomTom</td>
+                    <td>2,500/hour</td>
+                    <td>Rate-limited requests</td>
+                    <td>Strategic point selection</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="api-section">
+        <h2>🔄 Data Processing Pipeline</h2>
+        <p>The system processes collected data through this pipeline:</p>
+        
+        <div class="code-snippet">
+1. Route Analysis → GPS points segmentation
+2. API Orchestration → Parallel data collection calls
+3. Data Validation → Quality checks and error handling
+4. Database Storage → Structured data storage in MongoDB
+5. Risk Calculation → Comprehensive risk scoring
+6. Report Generation → Analysis and recommendations
+        </div>
+    </div>
+
+    <div class="api-section">
+        <h2>🚀 Implementation Status</h2>
+        <div class="highlight">
+            <p><strong>Currently Active:</strong> Google Maps APIs, OpenWeatherMap API provide core functionality for route planning and basic weather data.</p>
+            
+            <p><strong>Configured but Limited:</strong> TomTom, HERE, Mapbox, Visual Crossing APIs are configured but have fallback mechanisms when unavailable.</p>
+            
+            <p><strong>Next Phase:</strong> Emergency communication APIs (Twilio), enhanced satellite imagery analysis, and real-time incident reporting systems.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "route": {
+    "routeId": "RT1751684982313NZE2P",
+    "routeName": "MEERUT to MOTI FIlling STation",
+    "fromName": "meerut depot",
+    "toName": "moti filling station"
+  },
+  "downloadSummary": {
+    "totalTurns": 49,
+    "successful": 49,
+    "failed": 0,
+    "skipped": 0,
+    "successRate": 100
+  },
+  "downloadPath": "downloads\\sharp-turn-images\\RT1751684982313NZE2P",
+  "timestamp": "2025-07-05T13:03:25.642Z"
+}
