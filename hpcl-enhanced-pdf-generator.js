@@ -10,7 +10,7 @@ const path = require('path');
 
 class HPCLDynamicPDFGenerator {
     constructor() {
-        // HPCL Official Color Scheme
+        // Enhanced HPCL Color Scheme for Modern Design
         this.colors = {
             primary: [0, 82, 147],      // HPCL Blue #005293
             secondary: [60, 60, 60],    // Dark Gray
@@ -20,7 +20,12 @@ class HPCLDynamicPDFGenerator {
             info: [0, 82, 147],         // HPCL Blue
             lightGray: [245, 245, 245], // Light Gray #f5f5f5
             white: [255, 255, 255],     // White
-            accent: [255, 193, 7]       // Yellow accent #ffc107
+            accent: [255, 193, 7],      // Yellow accent #ffc107
+            darkGray: [52, 58, 64],     // Dark text
+            softBlue: [232, 245, 255],  // Soft blue background
+            softGreen: [240, 248, 240], // Soft green background
+            softRed: [255, 245, 245],   // Soft red background
+            modernGray: [248, 249, 250] // Modern light background
         };
         
         // Check for HPCL logo
@@ -314,76 +319,108 @@ class HPCLDynamicPDFGenerator {
     }
 
     /**
-     * DYNAMIC: Add title page header with logo
+     * DYNAMIC: Add title page header with logo - Enhanced Design
      */
     addDynamicTitlePageHeader(doc, routeData) {
-        // Header background
-        doc.rect(0, 0, doc.page.width, 90).fill(this.colors.primary);
+        // Enhanced gradient header background
+        const headerHeight = 110;
         
-        // Add HPCL Logo if available
+        // Primary header background with subtle gradient effect
+        doc.rect(0, 0, doc.page.width, headerHeight).fill(this.colors.primary);
+        
+        // Add subtle accent stripe
+        doc.rect(0, headerHeight - 4, doc.page.width, 4).fill(this.colors.accent);
+        
+        // Add HPCL Logo with enhanced positioning
         if (this.hasLogo) {
             try {
-                doc.image(this.logoPath, 20, 15, { width: 50, height: 50 });
+                doc.image(this.logoPath, 30, 20, { width: 65, height: 65 });
+                
+                // Add subtle logo shadow effect
+                doc.circle(62.5, 52.5, 35).stroke([255, 255, 255, 0.1]);
             } catch (error) {
                 console.warn('Warning: Could not load HPCL logo:', error.message);
             }
         }
         
-        // Company name and division
-        doc.fontSize(22).fill('white').font('Helvetica-Bold')
-           .text('HINDUSTAN PETROLEUM CORPORATION LIMITED', 80, 20);
+        // Enhanced company branding with better typography
+        doc.fontSize(14).fill('white').font('Helvetica-Bold')
+           .text('HINDUSTAN PETROLEUM CORPORATION LIMITED', 110, 20);
         
-        doc.fontSize(14).font('Helvetica')
-           .text('Journey Risk Management Division', 80, 45);
+        // Division with enhanced styling
+        doc.fontSize(12).font('Helvetica').fillColor([220, 220, 220])
+           .text('Journey Risk Management Division', 110, 65);
         
-        doc.fontSize(11)
-           .text('Powered by Route Analytics Pro - AI Intelligence Platform', 80, 65);
+        // Enhanced tagline with modern styling
+        doc.fontSize(9).font('Helvetica-Oblique').fillColor([200, 200, 200])
+           .text('🚀 Powered by Route Analytics Pro - AI Intelligence Platform', 110, 82);
     }
 
     /**
-     * DYNAMIC: Add main title with route-specific information
+     * DYNAMIC: Add main title with route-specific information - Enhanced Design
      */
     addDynamicMainTitle(doc, routeData) {
-        // Main title
-        doc.y = 120;
-        doc.fontSize(26).fillColor(this.colors.primary).font('Helvetica-Bold')
+        // Enhanced main title with better spacing
+        doc.y = 140;
+        
+        // Add decorative elements
+        const centerX = doc.page.width / 2;
+        doc.moveTo(centerX - 100, doc.y - 10).lineTo(centerX + 100, doc.y - 10)
+           .strokeColor(this.colors.accent).lineWidth(2).stroke();
+        
+        // Main title with enhanced typography
+        doc.fontSize(28).fillColor(this.colors.primary).font('Helvetica-Bold')
            .text('COMPREHENSIVE JOURNEY RISK', 0, doc.y, { align: 'center', width: doc.page.width });
         
-        doc.y += 32;
-        doc.text('MANAGEMENT ANALYSIS REPORT', 0, doc.y, { align: 'center', width: doc.page.width });
-        
-        // Dynamic subtitle based on data quality
         doc.y += 35;
+        doc.fontSize(24).fillColor(this.colors.primary)
+           .text('MANAGEMENT ANALYSIS REPORT', 0, doc.y, { align: 'center', width: doc.page.width });
+        
+        // Enhanced decorative line
+        doc.y += 25;
+        doc.moveTo(centerX - 80, doc.y).lineTo(centerX + 80, doc.y)
+           .strokeColor(this.colors.accent).lineWidth(1).stroke();
+        
+        // Dynamic subtitle with enhanced styling
+        doc.y += 20;
         const dataQualityText = routeData.dataQuality.level === 'excellent' ? 
-            'Enhanced with Complete AI Analysis & Multi-API Integration' :
+            '✨ Enhanced with Complete AI Analysis & Multi-API Integration' :
             routeData.dataQuality.level === 'good' ?
-            'Enhanced with Advanced AI Analysis & API Integration' :
-            'Enhanced with Artificial Intelligence & Multi-API Analysis';
+            '🔬 Enhanced with Advanced AI Analysis & API Integration' :
+            '🤖 Enhanced with Artificial Intelligence & Multi-API Analysis';
             
-        doc.fontSize(15).fillColor(this.colors.secondary).font('Helvetica')
+        doc.fontSize(14).fillColor(this.colors.secondary).font('Helvetica-Oblique')
            .text(dataQualityText, 0, doc.y, { align: 'center', width: doc.page.width });
     }
 
     /**
-     * DYNAMIC: Add route details box with real data
+     * DYNAMIC: Add route details box with real data - Enhanced Design
      */
     addDynamicRouteDetailsBox(doc, routeData) {
-        doc.y += 45;
+        doc.y += 50;
         const boxY = doc.y;
-        const boxHeight = 160; // Increased for more content
+        const boxHeight = 180; // Increased for better spacing
+        const boxX = 60;
+        const boxWidth = doc.page.width - 120;
         
-        // Box background
-        doc.rect(50, boxY, doc.page.width - 100, boxHeight).fill([250, 250, 250]).stroke();
+        // Enhanced box with shadow effect
+        doc.rect(boxX + 3, boxY + 3, boxWidth, boxHeight).fill([200, 200, 200, 0.3]); // Shadow
+        doc.rect(boxX, boxY, boxWidth, boxHeight).fill([248, 249, 250]).stroke([220, 220, 220]);
         
-        // Box header with data quality indicator
+        // Enhanced header with gradient-like effect
         const headerColor = routeData.dataQuality.level === 'excellent' ? this.colors.success :
                            routeData.dataQuality.level === 'good' ? this.colors.info :
                            routeData.dataQuality.level === 'fair' ? this.colors.warning : this.colors.danger;
         
-        doc.rect(50, boxY, doc.page.width - 100, 30).fill(headerColor);
+        doc.rect(boxX, boxY, boxWidth, 35).fill(headerColor);
         
-        doc.fontSize(16).fillColor('white').font('Helvetica-Bold')
-           .text(`📋 ROUTE ANALYSIS DETAILS (${routeData.dataQuality.level.toUpperCase()} DATA)`, 60, boxY + 8);
+        // Add quality indicator icon
+        const qualityIcon = routeData.dataQuality.level === 'excellent' ? '⭐' :
+                           routeData.dataQuality.level === 'good' ? '✅' :
+                           routeData.dataQuality.level === 'fair' ? '⚠️' : '🔴';
+        
+        doc.fontSize(15).fillColor('white').font('Helvetica-Bold')
+           .text(`${qualityIcon} ROUTE ANALYSIS DETAILS (${routeData.dataQuality.level.toUpperCase()} DATA)`, boxX + 15, boxY + 10);
         
         // Dynamic route details
         const detailsStartY = boxY + 40;
@@ -418,13 +455,20 @@ class HPCLDynamicPDFGenerator {
             routeDetails.splice(-2, 0, `Critical Risk Points: ${routeData.dynamicStats.riskAnalysis.criticalPoints}`);
         }
         
-        // Render details
-        doc.fontSize(11).fillColor(this.colors.secondary).font('Helvetica');
+        // Enhanced details rendering with better formatting
+        doc.fontSize(10).fillColor(this.colors.secondary).font('Helvetica');
         
         let detailY = detailsStartY;
-        routeDetails.forEach(detail => {
-            doc.text(`• ${detail}`, 65, detailY);
-            detailY += 13;
+        routeDetails.forEach((detail, index) => {
+            // Alternate row background for better readability
+            if (index % 2 === 0) {
+                doc.rect(boxX + 5, detailY - 2, boxWidth - 10, 14).fill([240, 245, 250]);
+            }
+            
+            // Enhanced bullet points with icons
+            const icon = index < 2 ? '📍' : index < 4 ? '📏' : index < 6 ? '🛣️' : '📊';
+            doc.text(`${icon} ${detail}`, boxX + 15, detailY);
+            detailY += 15;
         });
         
         // Dynamic risk level indicator
@@ -432,13 +476,14 @@ class HPCLDynamicPDFGenerator {
     }
 
     /**
-     * DYNAMIC: Add risk indicator based on actual calculated risk
+     * DYNAMIC: Add risk indicator based on actual calculated risk - Enhanced Design
      */
     addDynamicRiskIndicator(doc, routeData, yPosition) {
         // Determine risk level from multiple sources
         let riskLevel = 'PENDING';
         let riskScore = 0;
         let riskColor = this.colors.secondary;
+        let riskIcon = '⏳';
         
         if (routeData.riskScores?.totalWeightedScore) {
             riskScore = routeData.riskScores.totalWeightedScore;
@@ -448,20 +493,45 @@ class HPCLDynamicPDFGenerator {
             riskLevel = this.calculateRiskLevel(riskScore);
         }
         
-        // Set color based on risk level
+        // Enhanced color and icon based on risk level
         switch (riskLevel) {
-            case 'CRITICAL': riskColor = this.colors.danger; break;
-            case 'HIGH': riskColor = [255, 87, 34]; break;
-            case 'MEDIUM': riskColor = this.colors.warning; break;
-            case 'LOW': riskColor = this.colors.success; break;
-            default: riskColor = this.colors.secondary; break;
+            case 'CRITICAL': 
+                riskColor = this.colors.danger; 
+                riskIcon = '🚨'; 
+                break;
+            case 'HIGH': 
+                riskColor = [255, 87, 34]; 
+                riskIcon = '⚠️'; 
+                break;
+            case 'MEDIUM': 
+                riskColor = this.colors.warning; 
+                riskIcon = '⚡'; 
+                break;
+            case 'LOW': 
+                riskColor = this.colors.success; 
+                riskIcon = '✅'; 
+                break;
+            default: 
+                riskColor = this.colors.secondary; 
+                riskIcon = '⏳'; 
+                break;
         }
         
-        // Risk indicator box
+        // Enhanced risk indicator with shadow and rounded corners effect
         doc.y = yPosition;
-        doc.rect(50, doc.y, doc.page.width - 100, 25).fill(riskColor);
+        const riskBoxX = 60;
+        const riskBoxWidth = doc.page.width - 120;
         
-        let riskText = `ROUTE RISK LEVEL: ${riskLevel}`;
+        // Shadow effect
+        doc.rect(riskBoxX + 2, doc.y + 2, riskBoxWidth, 30).fill([0, 0, 0, 0.2]);
+        
+        // Main risk box with enhanced styling
+        doc.rect(riskBoxX, doc.y, riskBoxWidth, 30).fill(riskColor);
+        
+        // Add accent border
+        doc.rect(riskBoxX, doc.y, riskBoxWidth, 3).fill(this.colors.accent);
+        
+        let riskText = `${riskIcon} ROUTE RISK LEVEL: ${riskLevel}`;
         if (riskScore > 0) {
             riskText += ` (Score: ${riskScore.toFixed(1)}/10)`;
         }
@@ -469,8 +539,8 @@ class HPCLDynamicPDFGenerator {
             riskText += ` • ${routeData.dynamicStats.riskAnalysis.criticalPoints} Critical Points`;
         }
         
-        doc.fontSize(13).fillColor('white').font('Helvetica-Bold')
-           .text(riskText, 0, doc.y + 7, { align: 'center', width: doc.page.width });
+        doc.fontSize(12).fillColor('white').font('Helvetica-Bold')
+           .text(riskText, 0, doc.y + 9, { align: 'center', width: doc.page.width });
     }
 
     /**
@@ -484,21 +554,100 @@ class HPCLDynamicPDFGenerator {
     }
 
     /**
-     * DYNAMIC: Add footer with data source information
+     * Create a detailed table for PDF reports - Enhanced Design
+     * @param {PDFDocument} doc - PDF document instance
+     * @param {string} title - Table title
+     * @param {Array} data - Array of {label, value} objects
+     * @param {number} yPosition - Y position to start table
+     * @param {Object} options - Table styling options
+     */
+    createDetailedTable(doc, title, data, yPosition, options = {}) {
+        const {
+            rowHeight = 22,
+            fontSize = 10,
+            headerColor = this.colors.primary,
+            textColor = this.colors.darkGray,
+            borderColor = [230, 230, 230],
+            padding = 15
+        } = options;
+
+        const tableY = yPosition;
+        const tableWidth = doc.page.width - 100;
+        const tableX = 50;
+        
+        // Enhanced table with shadow effect
+        doc.rect(tableX + 2, tableY + 2, tableWidth, 30 + (data.length * rowHeight)).fill([0, 0, 0, 0.1]); // Shadow
+        
+        // Enhanced table header with gradient-like effect
+        doc.rect(tableX, tableY, tableWidth, 30).fill(headerColor);
+        doc.rect(tableX, tableY, tableWidth, 3).fill(this.colors.accent); // Top accent
+        
+        // Header icon based on title
+        const headerIcon = title.includes('Risk') ? '⚠️' :
+                          title.includes('Safety') ? '🛡️' :
+                          title.includes('Weather') ? '🌤️' :
+                          title.includes('Traffic') ? '🚦' : '📊';
+        
+        doc.fontSize(12).fillColor('white').font('Helvetica-Bold')
+           .text(`${headerIcon} ${title}`, tableX + 15, tableY + 9);
+        
+        let currentY = tableY + 30;
+        
+        // Enhanced table rows with better styling
+        data.forEach((row, index) => {
+            const rowColor = index % 2 === 0 ? this.colors.lightGray : 'white';
+            
+            // Row background with subtle border
+            doc.rect(tableX, currentY, tableWidth, rowHeight).fill(rowColor)
+               .stroke(borderColor);
+            
+            // Add status indicator for certain values
+            let statusIcon = '';
+            if (row.value.toString().toLowerCase().includes('high')) statusIcon = '🔴';
+            else if (row.value.toString().toLowerCase().includes('medium')) statusIcon = '🟡';
+            else if (row.value.toString().toLowerCase().includes('low')) statusIcon = '🟢';
+            else if (row.value.toString().includes('%')) statusIcon = '📈';
+            
+            // Enhanced text rendering
+            doc.fontSize(fontSize).fillColor(textColor).font('Helvetica')
+               .text(`• ${row.label}`, tableX + padding, currentY + 6);
+            
+            doc.font('Helvetica-Bold').fillColor(this.colors.primary)
+               .text(`${statusIcon} ${row.value}`, tableX + tableWidth - 180, currentY + 6);
+            
+            currentY += rowHeight;
+        });
+        
+        return currentY;
+    }
+
+    /**
+     * DYNAMIC: Add footer with data source information - Enhanced Design
      */
     addDynamicTitlePageFooter(doc, routeData) {
-        const footerY = doc.page.height - 60;
+        const footerY = doc.page.height - 90;
         
-        // Footer separator line
-        doc.strokeColor(this.colors.primary).lineWidth(2)
-           .moveTo(50, footerY).lineTo(doc.page.width - 50, footerY).stroke();
+        // Enhanced footer with gradient background
+        doc.rect(0, footerY, doc.page.width, 90).fill([248, 249, 250]);
         
-        // Main footer
+        // Add top border accent
+        doc.rect(0, footerY, doc.page.width, 2).fill(this.colors.accent);
+        
+        // Generation timestamp with enhanced styling
+        const timestamp = new Date().toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        
         doc.fontSize(10).fillColor(this.colors.primary).font('Helvetica-Bold')
-           .text('Generated by HPCL Journey Risk Management System', 
-                 0, footerY + 10, { align: 'center', width: doc.page.width });
+           .text(`📅 Report Generated: ${timestamp} (IST)`, 60, footerY + 12);
         
-        // Dynamic data source information
+        // Enhanced data source information with icons
         const dataSources = [];
         if (routeData.relatedData.sharpTurns > 0) dataSources.push('Sharp Turns Analysis');
         if (routeData.relatedData.blindSpots > 0) dataSources.push('Blind Spots Detection');
@@ -507,51 +656,59 @@ class HPCLDynamicPDFGenerator {
         if (routeData.relatedData.networkCoverage > 0) dataSources.push('Network Coverage');
         
         const dataSourceText = dataSources.length > 0 ? 
-            `Data Sources: ${dataSources.slice(0, 3).join(' • ')}${dataSources.length > 3 ? ' • +More' : ''}` :
-            'Real-time Risk Assessment • Professional Safety Analysis';
+            `🌐 Data Sources: ${dataSources.slice(0, 3).join(' • ')}${dataSources.length > 3 ? ' • +More' : ''}` :
+            '🌐 Real-time Risk Assessment • Professional Safety Analysis';
         
         doc.fontSize(9).fillColor(this.colors.secondary).font('Helvetica')
-           .text(dataSourceText, 0, footerY + 25, { align: 'center', width: doc.page.width });
+           .text(dataSourceText, 60, footerY + 28);
         
-        // Analysis timestamp
-        const analysisDate = routeData.lastAnalyzed ? 
-            new Date(routeData.lastAnalyzed).toLocaleString() : 
-            'Recently analyzed';
+        // AI Models information
+        doc.text('🤖 AI Models: Risk Assessment AI • Pattern Recognition • Route Optimization', 60, footerY + 42);
         
-        doc.fontSize(8).fillColor([120, 120, 120])
-           .text(`Last Analysis: ${analysisDate} • CONFIDENTIAL - For Internal HPCL Use Only`, 
-                 0, footerY + 38, { align: 'center', width: doc.page.width });
+        // Enhanced disclaimer with better formatting
+        doc.fontSize(8).fillColor([120, 120, 120]).font('Helvetica-Oblique')
+           .text('⚠️ Disclaimer: This report is generated using AI-powered analysis and should be used as a guidance tool. Always follow traffic rules and exercise caution while driving.', 
+                 60, footerY + 58, { width: doc.page.width - 120, lineGap: 2 });
+        
+        // Add decorative footer element
+        const centerX = doc.page.width / 2;
+        doc.moveTo(centerX - 50, footerY + 78).lineTo(centerX + 50, footerY + 78)
+           .strokeColor(this.colors.accent).lineWidth(1).stroke();
     }
 
     /**
-     * MAIN METHOD: Generate dynamic title page from Route ID
+     * MAIN METHOD: Generate dynamic title page from Route ID - Enhanced Layout
      * @param {string} routeId - MongoDB ObjectId
      * @param {string} userId - User ID for ownership verification
      * @param {string} outputPath - Output file path
      */
     async generateDynamicTitlePage(routeId, userId = null, outputPath = null) {
         try {
-            console.log('📄 Generating DYNAMIC HPCL Title Page...');
+            console.log('📄 Generating ENHANCED DYNAMIC HPCL Title Page...');
             console.log(`🔍 Route ID: ${routeId}`);
             console.log(`👤 User ID: ${userId || 'Not specified'}`);
             
             // Load complete dynamic route data
             const routeData = await this.loadDynamicRouteData(routeId, userId);
             
-            // Create PDF document
+            // Create PDF document with enhanced settings
             const doc = new PDFDocument({ 
                 margin: 0,
                 size: 'A4',
+                bufferPages: true,
                 info: {
                     Title: `HPCL Journey Risk Analysis - ${routeData.routeName || 'Route Analysis'}`,
                     Author: 'HPCL Journey Risk Management System',
-                    Subject: `Dynamic Route Analysis: ${routeData.fromName || 'Source'} to ${routeData.toName || 'Destination'}`,
-                    Keywords: `HPCL, Dynamic Analysis, ${routeData.routeId}, Safety, Risk Assessment`,
-                    Creator: 'HPCL Risk Management Division - Dynamic Generator'
+                    Subject: `Enhanced Dynamic Route Analysis: ${routeData.fromName || 'Source'} to ${routeData.toName || 'Destination'}`,
+                    Keywords: `HPCL, Enhanced Analysis, ${routeData.routeId}, Safety, Risk Assessment, AI`,
+                    Creator: 'HPCL Risk Management Division - Enhanced Dynamic Generator'
                 }
             });
 
-            // Generate dynamic content
+            // Add subtle page background for modern look
+            doc.rect(0, 0, doc.page.width, doc.page.height).fill([252, 253, 255]);
+
+            // Generate enhanced dynamic content
             this.addDynamicTitlePageHeader(doc, routeData);
             this.addDynamicMainTitle(doc, routeData);
             this.addDynamicRouteDetailsBox(doc, routeData);
@@ -584,6 +741,79 @@ class HPCLDynamicPDFGenerator {
             console.error('❌ Error generating dynamic title page:', error);
             throw error;
         }
+    }
+}
+
+    /**
+     * Add detailed analysis page with comprehensive data - Enhanced Design
+     */
+    addDetailedAnalysisPage(doc, routeData) {
+        doc.addPage();
+        
+        // Enhanced page background
+        doc.rect(0, 0, doc.page.width, doc.page.height).fill([252, 253, 255]);
+        
+        // Enhanced page header with decorative elements
+        const headerY = 40;
+        doc.rect(0, headerY, doc.page.width, 60).fill(this.colors.primary);
+        doc.rect(0, headerY + 57, doc.page.width, 3).fill(this.colors.accent);
+        
+        doc.fontSize(20).fillColor('white').font('Helvetica-Bold')
+           .text('📊 DETAILED ROUTE ANALYSIS', 50, headerY + 18);
+        
+        doc.fontSize(12).fillColor([220, 220, 220]).font('Helvetica')
+           .text('Comprehensive AI-Powered Risk Assessment & Safety Analysis', 50, headerY + 42);
+        
+        let currentY = 130;
+        
+        // Enhanced Risk Analysis Section
+        if (routeData.dynamicStats.riskAnalysis) {
+            const riskData = [
+                { label: 'Average Risk Score', value: `${routeData.dynamicStats.riskAnalysis.avgRiskScore.toFixed(1)}/10` },
+                { label: 'Critical Risk Points', value: `${routeData.dynamicStats.riskAnalysis.criticalPoints} locations` },
+                { label: 'High Risk Distribution', value: `${routeData.dynamicStats.riskAnalysis.riskDistribution.high} zones` },
+                { label: 'Medium Risk Distribution', value: `${routeData.dynamicStats.riskAnalysis.riskDistribution.medium} zones` },
+                { label: 'Safety Confidence', value: `${(100 - routeData.dynamicStats.riskAnalysis.avgRiskScore * 10).toFixed(1)}%` }
+            ];
+            
+            currentY = this.createDetailedTable(doc, 'AI Risk Analysis Summary', riskData, currentY) + 25;
+        }
+        
+        // Enhanced Safety Metrics Section
+        if (routeData.dynamicStats.safetyMetrics) {
+            const safetyData = [
+                { label: 'Hospital Services', value: `${routeData.dynamicStats.safetyMetrics.emergencyServiceTypes.hospital} facilities` },
+                { label: 'Police Stations', value: `${routeData.dynamicStats.safetyMetrics.emergencyServiceTypes.police} stations` },
+                { label: 'Fire Stations', value: `${routeData.dynamicStats.safetyMetrics.emergencyServiceTypes.fire_station} stations` },
+                { label: 'Sharp Turns (Hairpin)', value: `${routeData.dynamicStats.safetyMetrics.sharpTurnsSeverity.hairpin} turns` },
+                { label: 'Accident Severity (Major)', value: `${routeData.dynamicStats.safetyMetrics.accidentSeverity.major} incidents` }
+            ];
+            
+            currentY = this.createDetailedTable(doc, 'Safety Infrastructure & Emergency Response', safetyData, currentY) + 25;
+        }
+        
+        // Enhanced Infrastructure Metrics
+        if (routeData.dynamicStats.infrastructureMetrics) {
+            const infraData = [
+                { label: 'Road Quality (Poor)', value: `${routeData.dynamicStats.infrastructureMetrics.roadQuality.poor} segments` },
+                { label: 'Road Quality (Critical)', value: `${routeData.dynamicStats.infrastructureMetrics.roadQuality.critical} segments` },
+                { label: 'Weather Risk Factor', value: `${routeData.dynamicStats.infrastructureMetrics.weatherRisk.toFixed(1)}/10` },
+                { label: 'Traffic Congestion', value: `${routeData.dynamicStats.infrastructureMetrics.trafficCongestion.toFixed(1)}%` },
+                { label: 'Network Dead Zones', value: `${routeData.dynamicStats.infrastructureMetrics.networkDeadZones} areas` }
+            ];
+            
+            currentY = this.createDetailedTable(doc, 'Infrastructure & Environmental Assessment', infraData, currentY) + 25;
+        }
+        
+        // Add data quality assessment
+        const qualityData = [
+            { label: 'Data Quality Level', value: routeData.dataQuality.level.toUpperCase() },
+            { label: 'Data Quality Score', value: `${routeData.dataQuality.score}%` },
+            { label: 'Total Data Points', value: `${routeData.dynamicStats.totalDataPoints} points` },
+            { label: 'Last Analysis', value: new Date(routeData.lastAnalyzed).toLocaleDateString() }
+        ];
+        
+        currentY = this.createDetailedTable(doc, 'Data Quality & Analysis Metrics', qualityData, currentY) + 25;
     }
 }
 
