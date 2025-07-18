@@ -420,7 +420,7 @@ class HPCLDynamicPDFGenerator {
                            routeData.dataQuality.level === 'fair' ? '⚠️' : '🔴';
         
         doc.fontSize(15).fillColor('white').font('Helvetica-Bold')
-           .text(`${qualityIcon} ROUTE ANALYSIS DETAILS (${routeData.dataQuality.level.toUpperCase()} DATA)`, boxX + 15, boxY + 10);
+           .text(`ROUTE ANALYSIS DETAILS (${routeData.dataQuality.level.toUpperCase()} DATA)`, boxX + 15, boxY + 10);
         
         // Dynamic route details
         const detailsStartY = boxY + 40;

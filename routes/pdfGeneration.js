@@ -919,68 +919,97 @@ async function addExecutiveSummaryPage(doc, routeData, generator) {
   doc.y = 100;
   
   doc.fontSize(20).fillColor(generator.colors.primary).font('Helvetica-Bold')
-     .text('EXECUTIVE SUMMARY & CONCLUSIONS', 50, doc.y);
+     .text('EXECUTIVE SUMMARY – ROUTE OVERVIEW', 50, doc.y);
   
   doc.y += 40;
   
-  // Key Findings
-  doc.fontSize(14).fillColor(generator.colors.secondary).font('Helvetica-Bold')
-     .text('KEY FINDINGS', 50, doc.y);
+  // Route Parameters Table
+  const formatDuration = (minutes) => {
+    if (!minutes) return 'Not specified';
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours} hours ${mins} mins` : `${mins} minutes`;
+  };
   
-  doc.y += 25;
-  doc.fontSize(11).font('Helvetica').fillColor(generator.colors.secondary);
-  
-  const keyFindings = [
-    `• Overall Risk Grade: ${routeData.riskLevel || 'N/A'} (${(typeof routeData.dynamicStats.riskAnalysis.avgRiskScore === 'number' ? routeData.dynamicStats.riskAnalysis.avgRiskScore.toFixed(2) : routeData.dynamicStats.riskAnalysis.avgRiskScore || 'N/A')}/10)`,
-    `• Critical Risk Points: ${routeData.dynamicStats.riskAnalysis.criticalPoints} locations require immediate attention`,
-    `• Data Quality: ${routeData.dataQuality.level.toUpperCase()} (${routeData.dataQuality.score}% coverage)`,
-    `• Primary Risk Factors: ${routeData.relatedData.sharpTurns > 5 ? 'Sharp Turns, ' : ''}${routeData.relatedData.blindSpots > 3 ? 'Visibility Issues, ' : ''}${routeData.dynamicStats.infrastructureMetrics.roadQuality < 5 ? 'Poor Road Conditions' : 'Infrastructure Adequate'}`,
-    `• Emergency Preparedness: ${routeData.relatedData.emergencyServices > 2 ? 'Adequate' : 'Requires Enhancement'}`,
-    `• Recommendation Priority: ${routeData.dynamicStats.riskAnalysis.criticalPoints > 0 ? 'HIGH - Immediate Action Required' : 'MEDIUM - Standard Monitoring'}`
+  const routeParams = [
+    ['Parameter', 'Details'],
+    ['Origin', `${routeData.fromAddress || 'N/A'} [${routeData.fromCode || 'N/A'}]`],
+    ['Destination', `${routeData.toAddress || 'N/A'} [${routeData.toCode || 'N/A'}]`],
+    ['Total Distance', `${routeData.totalDistance || 0} km`],
+    ['Estimated Duration', formatDuration(routeData.estimatedDuration)],
+    ['Major Highways', routeData.majorHighways ? routeData.majorHighways.join(', ') : 'N/A'],
+    ['Terrain', routeData.terrain || 'Mixed']
   ];
   
-  keyFindings.forEach(finding => {
-    doc.text(finding, 50, doc.y);
-    doc.y += 18;
-  });
-  
-  doc.y += 20;
-  
-  // Final Recommendations
-  doc.fontSize(14).fillColor(generator.colors.success).font('Helvetica-Bold')
-     .text('FINAL RECOMMENDATIONS', 50, doc.y);
-  
-  doc.y += 25;
-  doc.fontSize(11).font('Helvetica').fillColor(generator.colors.secondary);
-  
-  const finalRecs = [
-    (routeData.dynamicStats.riskAnalysis.avgRiskScore || 0) > 7 ? '• CRITICAL: Route requires comprehensive safety review before use' : '• Route approved for use with standard safety protocols',
-    '• Implement real-time monitoring during route execution',
-    '• Conduct regular safety briefings for all personnel',
-    '• Maintain emergency communication protocols',
-    '• Schedule periodic route re-analysis for safety updates'
-  ];
-  
-  finalRecs.forEach(rec => {
-    doc.text(rec, 50, doc.y);
-    doc.y += 18;
-  });
+  generator.createDetailedTable(doc, routeParams, [150, 350]);
   
   doc.y += 30;
   
-  // Report Certification
-  doc.fontSize(12).fillColor(generator.colors.primary).font('Helvetica-Bold')
-     .text('HPCL JOURNEY RISK MANAGEMENT CERTIFICATION', 50, doc.y);
+  // Calculate overall risk score and level
+  const avgRiskScore = routeData.dynamicStats?.riskAnalysis?.avgRiskScore || 3;
+  const riskLevel = avgRiskScore <= 2 ? 'LOW RISK' : 
+                   avgRiskScore <= 4 ? 'MILD RISK' : 
+                   avgRiskScore <= 6 ? 'MODERATE RISK' : 
+                   avgRiskScore <= 8 ? 'HIGH RISK' : 'CRITICAL RISK';
   
-  doc.y += 20;
-  doc.fontSize(10).fillColor(generator.colors.secondary).font('Helvetica')
-     .text(`This report has been generated using HPCL's comprehensive route analysis system.`, 50, doc.y);
-  doc.y += 15;
-  doc.text(`Report ID: HPCL-${routeData.routeId}-${Date.now()}`, 50, doc.y);
-  doc.y += 15;
-  doc.text(`Generated: ${new Date().toLocaleString()}`, 50, doc.y);
-  doc.y += 15;
-  doc.text(`Valid until: ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()} (30 days)`, 50, doc.y);
+  // Total Weighted Route Score
+  doc.fontSize(16).fillColor(generator.colors.primary).font('Helvetica-Bold')
+     .text(`TOTAL WEIGHTED ROUTE SCORE: ${avgRiskScore.toFixed(1)} – ${riskLevel}`, 50, doc.y);
+  
+  doc.y += 30;
+  
+  // Risk Factor Rating Overview
+  doc.fontSize(14).fillColor(generator.colors.secondary).font('Helvetica-Bold')
+     .text('RISK FACTOR RATING OVERVIEW', 50, doc.y);
+  
+  doc.y += 25;
+  
+  // Helper function to determine risk category
+  const getRiskCategory = (score) => {
+    if (score <= 2) return 'Low Risk';
+    if (score <= 4) return 'Mild Risk';
+    if (score <= 6) return 'Moderate Risk';
+    if (score <= 8) return 'High Risk';
+    return 'Critical Risk';
+  };
+  
+  // Calculate dynamic risk scores based on actual route data
+  const calculateRiskScore = (value, thresholds) => {
+    if (value <= thresholds.low) return 1;
+    if (value <= thresholds.mild) return 3;
+    if (value <= thresholds.moderate) return 5;
+    if (value <= thresholds.high) return 7;
+    return 9;
+  };
+  
+  // Dynamic risk calculations
+  const roadConditionsScore = routeData.dynamicStats?.infrastructureMetrics?.roadQuality || 5;
+  const accidentAreasScore = calculateRiskScore(routeData.relatedData?.accidentProneAreas || 0, {low: 1, mild: 3, moderate: 5, high: 8});
+  const sharpTurnsScore = calculateRiskScore(routeData.relatedData?.sharpTurns || 0, {low: 2, mild: 5, moderate: 8, high: 12});
+  const blindSpotsScore = calculateRiskScore(routeData.relatedData?.blindSpots || 0, {low: 1, mild: 3, moderate: 6, high: 10});
+  const trafficScore = routeData.dynamicStats?.trafficMetrics?.avgDensity || 1;
+  const weatherScore = routeData.dynamicStats?.weatherMetrics?.riskLevel || 3;
+  const emergencyScore = calculateRiskScore(routeData.relatedData?.emergencyServices || 0, {low: 5, mild: 3, moderate: 2, high: 1});
+  const networkScore = calculateRiskScore(routeData.relatedData?.networkCoverage || 100, {low: 90, mild: 70, moderate: 50, high: 30});
+  const amenitiesScore = calculateRiskScore(routeData.relatedData?.roadsideAmenities || 0, {low: 5, mild: 3, moderate: 2, high: 1});
+  const securityScore = routeData.dynamicStats?.securityMetrics?.riskLevel || 1;
+  
+  // Risk factors data with dynamic values
+  const riskFactors = [
+    ['Risk Criterion', 'Risk Score', 'Risk Category'],
+    ['Road Conditions', roadConditionsScore.toFixed(1), getRiskCategory(roadConditionsScore)],
+    ['Accident-Prone Areas', accidentAreasScore.toFixed(1), getRiskCategory(accidentAreasScore)],
+    ['Sharp Turns', sharpTurnsScore.toFixed(1), getRiskCategory(sharpTurnsScore)],
+    ['Blind Spots', blindSpotsScore.toFixed(1), getRiskCategory(blindSpotsScore)],
+    ['Traffic Condition (Density)', trafficScore.toFixed(1), getRiskCategory(trafficScore)],
+    ['Seasonal Weather Conditions', weatherScore.toFixed(1), getRiskCategory(weatherScore)],
+    ['Emergency Handling Services', emergencyScore.toFixed(1), getRiskCategory(emergencyScore)],
+    ['Network Dead/Low Zones', networkScore.toFixed(1), getRiskCategory(networkScore)],
+    ['Roadside Amenities', amenitiesScore.toFixed(1), getRiskCategory(amenitiesScore)],
+    ['Security & Social Issues', securityScore.toFixed(1), getRiskCategory(securityScore)]
+  ];
+  
+  generator.createDetailedTable(doc, riskFactors, [200, 100, 150]);
 }
 
 // ============================================================================
