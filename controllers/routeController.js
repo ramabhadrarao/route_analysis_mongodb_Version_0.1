@@ -456,12 +456,66 @@ exports.getRoutes = async (req, res) => {
       .limit(limit)
       .select('-routePoints -metadata.processingNotes');
 
+    // Import required models for counting
+    const AccidentProneArea = require('../models/AccidentProneArea');
+    const BlindSpot = require('../models/BlindSpot');
+    const SharpTurn = require('../models/SharpTurn');
+    const EmergencyService = require('../models/EmergencyService');
+    const NetworkCoverage = require('../models/NetworkCoverage');
+    const RoadCondition = require('../models/RoadCondition');
+
+    // Enrich routes with counts from related collections
+    const enrichedRoutes = await Promise.all(routes.map(async (route) => {
+      const routeObj = route.toObject();
+      
+      try {
+        // Get counts for each collection
+        const [accidentAreasCount, blindSpotsCount, sharpTurnsCount, emergencyServicesCount, networkCoverageCount, roadConditionsCount] = await Promise.all([
+          AccidentProneArea.countDocuments({ routeId: route._id }),
+          BlindSpot.countDocuments({ routeId: route._id }),
+          SharpTurn.countDocuments({ routeId: route._id }),
+          EmergencyService.countDocuments({ routeId: route._id }),
+          NetworkCoverage.countDocuments({ routeId: route._id }),
+          RoadCondition.countDocuments({ routeId: route._id })
+        ]);
+
+        // Add counts to route object
+        routeObj.accidentAreasCount = accidentAreasCount;
+        routeObj.blindSpotsCount = blindSpotsCount;
+        routeObj.sharpTurnsCount = sharpTurnsCount;
+        routeObj.emergencyServicesCount = emergencyServicesCount;
+        routeObj.networkDeadZones = networkCoverageCount;
+        routeObj.roadConditionsIssues = roadConditionsCount;
+        
+        // Calculate processing status based on data availability
+        const hasData = accidentAreasCount > 0 || blindSpotsCount > 0 || sharpTurnsCount > 0 || emergencyServicesCount > 0;
+        routeObj.dataProcessingStatus = hasData ? 'completed' : 'pending';
+        
+        // Calculate risk score from riskScores if available
+        routeObj.riskScore = routeObj.riskScores?.totalWeightedScore || 0;
+        
+      } catch (countError) {
+        console.error(`Error counting data for route ${route._id}:`, countError);
+        // Set default values if counting fails
+        routeObj.accidentAreasCount = 0;
+        routeObj.blindSpotsCount = 0;
+        routeObj.sharpTurnsCount = 0;
+        routeObj.emergencyServicesCount = 0;
+        routeObj.networkDeadZones = 0;
+        routeObj.roadConditionsIssues = 0;
+        routeObj.dataProcessingStatus = 'pending';
+        routeObj.riskScore = 0;
+      }
+      
+      return routeObj;
+    }));
+
     const total = await Route.countDocuments(filter);
 
     res.status(200).json({
       success: true,
       data: {
-        routes,
+        routes: enrichedRoutes,
         pagination: {
           currentPage: page,
           totalPages: Math.ceil(total / limit),

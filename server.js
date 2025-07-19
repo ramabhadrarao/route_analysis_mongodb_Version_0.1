@@ -9,7 +9,12 @@ require('dotenv').config();
 const app = express();
 
 // Basic middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -120,6 +125,15 @@ try {
   console.error('❌ Error loading PDF routes:', error.message);
 }
 
+// Dynamic reports routes
+try {
+  const dynamicReportsRoutes = require('./routes/dynamicReports');
+  app.use('/api/dynamic-reports', dynamicReportsRoutes);
+  console.log('✅ Dynamic reports routes loaded');
+} catch (error) {
+  console.error('❌ Error loading dynamic reports routes:', error.message);
+}
+
 // ✅ CRITICAL: ADD BULK ROUTE PROCESSING ROUTES
 try {
   const bulkRouteRoutes = require('./routes/bulkRouteProcessor');
@@ -163,6 +177,7 @@ app.get('/', (req, res) => {
       enhancedRoadConditions: '/api/enhanced-road-conditions',
       sharpTurnImages: '/api/sharp-turn-images',
       visibilityImages: '/api/visibility-images',
+      dynamicReports: '/api/dynamic-reports',
       bulkRoutes: '/api/bulk-routes',
       pdf: '/api/pdf',
       health: '/health'
@@ -194,6 +209,7 @@ app.use('*', (req, res) => {
       '/api/enhanced-road-conditions',
       '/api/sharp-turn-images',
       '/api/visibility-images',
+      '/api/dynamic-reports',
       '/api/bulk-routes',
       '/api/pdf',
       '/health'
