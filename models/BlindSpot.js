@@ -286,7 +286,10 @@ const blindSpotSchema = new mongoose.Schema({
     'FALLBACK_MOCK',
     'google_places_api',  // Add this (lowercase version)
     'REAL_GPS_GEOMETRY',
-    'REAL_GOOGLE_ROADS_PLACES_API'
+    'REAL_GOOGLE_ROADS_PLACES_API',
+    'REAL_GOOGLE_ELEVATION_API',
+      'REAL_GOOGLE_ROADS_PLACES_API'
+      
   ],
   default: 'elevation_data'
 },
