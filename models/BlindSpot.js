@@ -457,38 +457,44 @@ blindSpotSchema.methods.getSafetyRecommendations = function() {
 };
 
 // Static method for route blind spot analysis
-blindSpotSchema.statics.getRouteBlindSpotsAnalysis = function(routeId) {
+BlindSpotSchema.statics.getRouteBlindSpotsAnalysis = function(routeId) {
   return this.aggregate([
-    { $match: { routeId: new mongoose.Types.ObjectId(routeId) }},
+    { $match: { routeId: mongoose.Types.ObjectId(routeId) } },
     {
       $group: {
-        _id: null,
+        _id: '$routeId',
         totalBlindSpots: { $sum: 1 },
         avgRiskScore: { $avg: '$riskScore' },
         maxRiskScore: { $max: '$riskScore' },
         criticalSpots: {
           $sum: { $cond: [{ $gte: ['$riskScore', 8] }, 1, 0] }
         },
-        highRiskSpots: {
-          $sum: { $cond: [{ $and: [{ $gte: ['$riskScore', 6] }, { $lt: ['$riskScore', 8] }] }, 1, 0] }
-        },
-        typeBreakdown: {
-          crest: { $sum: { $cond: [{ $eq: ['$spotType', 'crest'] }, 1, 0] }},
-          curve: { $sum: { $cond: [{ $eq: ['$spotType', 'curve'] }, 1, 0] }},
-          intersection: { $sum: { $cond: [{ $eq: ['$spotType', 'intersection'] }, 1, 0] }},
-          obstruction: { $sum: { $cond: [{ $eq: ['$spotType', 'obstruction'] }, 1, 0] }},
-          vegetation: { $sum: { $cond: [{ $eq: ['$spotType', 'vegetation'] }, 1, 0] }},
-          structure: { $sum: { $cond: [{ $eq: ['$spotType', 'structure'] }, 1, 0] }}
-        },
         avgVisibilityDistance: { $avg: '$visibilityDistance' },
         poorVisibilitySpots: {
           $sum: { $cond: [{ $lt: ['$visibilityDistance', 100] }, 1, 0] }
         },
-        severityBreakdown: {
-          critical: { $sum: { $cond: [{ $eq: ['$severityLevel', 'critical'] }, 1, 0] }},
-          significant: { $sum: { $cond: [{ $eq: ['$severityLevel', 'significant'] }, 1, 0] }},
-          moderate: { $sum: { $cond: [{ $eq: ['$severityLevel', 'moderate'] }, 1, 0] }},
-          minor: { $sum: { $cond: [{ $eq: ['$severityLevel', 'minor'] }, 1, 0] }}
+        // ✅ FIXED: Use separate accumulator fields
+        crestCount: { $sum: { $cond: [{ $eq: ['$spotType', 'crest'] }, 1, 0] } },
+        curveCount: { $sum: { $cond: [{ $eq: ['$spotType', 'curve'] }, 1, 0] } },
+        intersectionCount: { $sum: { $cond: [{ $eq: ['$spotType', 'intersection'] }, 1, 0] } },
+        obstructionCount: { $sum: { $cond: [{ $eq: ['$spotType', 'obstruction'] }, 1, 0] } }
+      }
+    },
+    {
+      // ✅ Add projection stage to create nested typeBreakdown object
+      $project: {
+        _id: 1,
+        totalBlindSpots: 1,
+        avgRiskScore: 1,
+        maxRiskScore: 1,
+        criticalSpots: 1,
+        avgVisibilityDistance: 1,
+        poorVisibilitySpots: 1,
+        typeBreakdown: {
+          crest: '$crestCount',
+          curve: '$curveCount',
+          intersection: '$intersectionCount',
+          obstruction: '$obstructionCount'
         }
       }
     }

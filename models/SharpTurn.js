@@ -525,12 +525,12 @@ sharpTurnSchema.methods.getSafetyRecommendations = function() {
 };
 
 // Enhanced static method for route analysis with image info
-sharpTurnSchema.statics.getRouteSharpTurnsAnalysis = function(routeId) {
+SharpTurnSchema.statics.getRouteSharpTurnsAnalysis = function(routeId) {
   return this.aggregate([
-    { $match: { routeId: new mongoose.Types.ObjectId(routeId) }},
+    { $match: { routeId: mongoose.Types.ObjectId(routeId) } },
     {
       $group: {
-        _id: null,
+        _id: '$routeId',
         totalTurns: { $sum: 1 },
         avgRiskScore: { $avg: '$riskScore' },
         maxRiskScore: { $max: '$riskScore' },
@@ -538,22 +538,30 @@ sharpTurnSchema.statics.getRouteSharpTurnsAnalysis = function(routeId) {
           $sum: { $cond: [{ $gte: ['$riskScore', 8] }, 1, 0] }
         },
         highRiskTurns: {
-          $sum: { $cond: [{ $and: [{ $gte: ['$riskScore', 6] }, { $lt: ['$riskScore', 8] }] }, 1, 0] }
+          $sum: { $cond: [{ $gte: ['$riskScore', 6] }, 1, 0] }
         },
+        // ✅ FIXED: Use separate accumulator fields
+        hairpinCount: { $sum: { $cond: [{ $eq: ['$turnSeverity', 'hairpin'] }, 1, 0] } },
+        sharpCount: { $sum: { $cond: [{ $eq: ['$turnSeverity', 'sharp'] }, 1, 0] } },
+        moderateCount: { $sum: { $cond: [{ $eq: ['$turnSeverity', 'moderate'] }, 1, 0] } },
+        gentleCount: { $sum: { $cond: [{ $eq: ['$turnSeverity', 'gentle'] }, 1, 0] } }
+      }
+    },
+    {
+      // ✅ Add projection stage to create nested severityBreakdown object
+      $project: {
+        _id: 1,
+        totalTurns: 1,
+        avgRiskScore: 1,
+        maxRiskScore: 1,
+        criticalTurns: 1,
+        highRiskTurns: 1,
         severityBreakdown: {
-          hairpin: { $sum: { $cond: [{ $eq: ['$turnSeverity', 'hairpin'] }, 1, 0] }},
-          sharp: { $sum: { $cond: [{ $eq: ['$turnSeverity', 'sharp'] }, 1, 0] }},
-          moderate: { $sum: { $cond: [{ $eq: ['$turnSeverity', 'moderate'] }, 1, 0] }},
-          gentle: { $sum: { $cond: [{ $eq: ['$turnSeverity', 'gentle'] }, 1, 0] }}
-        },
-        // NEW: Image statistics
-        turnsWithImages: {
-          $sum: { $cond: [{ $gt: ['$imageDownloadInfo.completedImages', 0] }, 1, 0] }
-        },
-        turnsWithAllImages: {
-          $sum: { $cond: [{ $gte: ['$imageDownloadInfo.completedImages', 3] }, 1, 0] }
-        },
-        totalImagesDownloaded: { $sum: '$imageDownloadInfo.completedImages' }
+          hairpin: '$hairpinCount',
+          sharp: '$sharpCount',
+          moderate: '$moderateCount',
+          gentle: '$gentleCount'
+        }
       }
     }
   ]);

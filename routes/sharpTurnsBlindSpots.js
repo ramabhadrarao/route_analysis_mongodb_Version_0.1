@@ -779,11 +779,32 @@ router.get('/routes/:routeId/visibility-stats', async (req, res) => {
     }
 
     // Get statistics from database aggregations
-    const [sharpTurnStats, blindSpotStats] = await Promise.all([
-      SharpTurn.getRouteSharpTurnsAnalysis(routeId),
-      BlindSpot.getRouteBlindSpotsAnalysis(routeId)
-    ]);
-
+  // ✅ IMPROVED - Add error handling and fallback
+const [sharpTurnStats, blindSpotStats] = await Promise.all([
+  SharpTurn.getRouteSharpTurnsAnalysis(routeId).catch(error => {
+    console.error('Sharp turns aggregation failed:', error.message);
+    return [{ 
+      totalTurns: 0, 
+      avgRiskScore: 0, 
+      maxRiskScore: 0, 
+      criticalTurns: 0, 
+      highRiskTurns: 0,
+      severityBreakdown: { hairpin: 0, sharp: 0, moderate: 0, gentle: 0 }
+    }];
+  }),
+  BlindSpot.getRouteBlindSpotsAnalysis(routeId).catch(error => {
+    console.error('Blind spots aggregation failed:', error.message);
+    return [{ 
+      totalBlindSpots: 0, 
+      avgRiskScore: 0, 
+      maxRiskScore: 0, 
+      criticalSpots: 0,
+      avgVisibilityDistance: 0,
+      poorVisibilitySpots: 0,
+      typeBreakdown: { crest: 0, curve: 0, intersection: 0, obstruction: 0 }
+    }];
+  })
+]);
     const turnStats = sharpTurnStats[0] || {};
     const spotStats = blindSpotStats[0] || {};
 
