@@ -300,7 +300,7 @@ router.post('/process-csv-enhanced', upload.single('routesCsvFile'), async (req,
       
       // NEW: Automatic visibility analysis options
       enableAutomaticVisibilityAnalysis = true,  // NEW: Default enabled
-      visibilityAnalysisTimeout = 540000,        // NEW: 3 minutes per route max
+      visibilityAnalysisTimeout = 180000,        // NEW: 3 minutes per route max
       continueOnVisibilityFailure = true,        // NEW: Don't fail entire batch if visibility fails
       visibilityAnalysisMode = 'comprehensive'   // NEW: 'basic', 'comprehensive', 'detailed'
     } = req.body;

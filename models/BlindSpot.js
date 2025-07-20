@@ -1,6 +1,5 @@
-// File: models/BlindSpot.js - COMPLETELY FIXED VERSION
-// Purpose: Fixed blind spot model with correct validation that actually saves data
-// CRITICAL FIX: Removed overly strict validation that was preventing saves
+// File: models/BlindSpot.js - FIXED VERSION
+// Purpose: Fixed blind spot model with corrected schema reference
 
 const mongoose = require('mongoose');
 
@@ -267,32 +266,30 @@ const blindSpotSchema = new mongoose.Schema({
   
   // FIXED: Analysis Data with all required enum values
   analysisMethod: {
-  type: String,
-  enum: [
-    'elevation_data', 
-    'street_view', 
-    'satellite_imagery', 
-    'field_survey', 
-    'places_api',  // Add this
-    'gps_data',
-    'elevation_ray_tracing',
-    'geometric_sight_distance',
-    'geometric_shadow_analysis',
-    'real_calculations',
-    'google_elevation_api',  // Add this
-    'aashto_standards',
-    'enhanced_gps_analysis',
-    'REAL_GOOGLE_API',  // This exists
-    'FALLBACK_MOCK',
-    'google_places_api',  // Add this (lowercase version)
-    'REAL_GPS_GEOMETRY',
-    'REAL_GOOGLE_ROADS_PLACES_API',
-    'REAL_GOOGLE_ELEVATION_API',
-      'REAL_GOOGLE_ROADS_PLACES_API'
-      
-  ],
-  default: 'elevation_data'
-},
+    type: String,
+    enum: [
+      'elevation_data', 
+      'street_view', 
+      'satellite_imagery', 
+      'field_survey', 
+      'places_api',
+      'gps_data',
+      'elevation_ray_tracing',
+      'geometric_sight_distance',
+      'geometric_shadow_analysis',
+      'real_calculations',
+      'google_elevation_api',
+      'aashto_standards',
+      'enhanced_gps_analysis',
+      'REAL_GOOGLE_API',
+      'FALLBACK_MOCK',
+      'google_places_api',
+      'REAL_GPS_GEOMETRY',
+      'REAL_GOOGLE_ROADS_PLACES_API',
+      'REAL_GOOGLE_ELEVATION_API'
+    ],
+    default: 'elevation_data'
+  },
   
   confidence: {
     type: Number,
@@ -456,8 +453,9 @@ blindSpotSchema.methods.getSafetyRecommendations = function() {
   }
 };
 
+// ✅ CRITICAL FIX: Use blindSpotSchema instead of SharpTurnSchema
 // Static method for route blind spot analysis
-BlindSpotSchema.statics.getRouteBlindSpotsAnalysis = function(routeId) {
+blindSpotSchema.statics.getRouteBlindSpotsAnalysis = function(routeId) {
   return this.aggregate([
     { $match: { routeId: mongoose.Types.ObjectId(routeId) } },
     {

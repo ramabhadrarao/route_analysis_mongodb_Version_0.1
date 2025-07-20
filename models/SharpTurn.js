@@ -1,6 +1,5 @@
-// File: models/SharpTurn.js - ENHANCED VERSION WITH EXTENDED IMAGE SUPPORT
-// Purpose: Enhanced Sharp Turn model with comprehensive image storage
-// MAINTAINS COMPATIBILITY with existing fields while adding new image capabilities
+// File: models/SharpTurn.js - FIXED VERSION
+// Purpose: Fixed Sharp Turn model with correct schema reference
 
 const mongoose = require('mongoose');
 
@@ -76,23 +75,17 @@ const sharpTurnSchema = new mongoose.Schema({
     required: true
   },
   
-  // ============================================================================
-  // ENHANCED IMAGE DATA FIELDS (Backward Compatible)
-  // ============================================================================
-  
-  // Original streetViewImage field (kept for compatibility)
+  // Image Data Fields
   streetViewImage: {
     url: String,
     filename: String,
-    heading: Number, // Direction of camera
-    pitch: Number,   // Up/down angle
-    fov: Number,     // Field of view
-    
-    // NEW: Enhanced fields for downloaded images
-    localPath: String,        // Local file path
-    publicUrl: String,        // Public accessible URL
-    downloadedAt: Date,       // When image was downloaded
-    size: Number,             // File size in bytes
+    heading: Number,
+    pitch: Number,
+    fov: Number,
+    localPath: String,
+    publicUrl: String,
+    downloadedAt: Date,
+    size: Number,
     quality: {
       type: String,
       enum: ['low', 'medium', 'high'],
@@ -105,14 +98,13 @@ const sharpTurnSchema = new mongoose.Schema({
     }
   },
   
-  // NEW: Satellite image field (separate from mapImage for clarity)
   satelliteImage: {
-    url: String,              // Google Maps satellite API URL
-    filename: String,         // File name
-    localPath: String,        // Local file path
-    publicUrl: String,        // Public accessible URL
-    downloadedAt: Date,       // When image was downloaded
-    size: Number,             // File size in bytes
+    url: String,
+    filename: String,
+    localPath: String,
+    publicUrl: String,
+    downloadedAt: Date,
+    size: Number,
     zoom: {
       type: Number,
       default: 18
@@ -129,18 +121,15 @@ const sharpTurnSchema = new mongoose.Schema({
     }
   },
   
-  // Enhanced mapImage field (kept for compatibility, enhanced for roadmap)
   mapImage: {
     url: String,
     filename: String,
     zoom: Number,
     mapType: String,
-    
-    // NEW: Enhanced fields
-    localPath: String,        // Local file path
-    publicUrl: String,        // Public accessible URL
-    downloadedAt: Date,       // When image was downloaded
-    size: Number,             // File size in bytes
+    localPath: String,
+    publicUrl: String,
+    downloadedAt: Date,
+    size: Number,
     quality: {
       type: String,
       enum: ['low', 'medium', 'high'],
@@ -153,14 +142,13 @@ const sharpTurnSchema = new mongoose.Schema({
     }
   },
   
-  // NEW: Roadmap image field (dedicated for roadmap downloads)
   roadmapImage: {
-    url: String,              // Google Maps roadmap API URL
-    filename: String,         // File name
-    localPath: String,        // Local file path
-    publicUrl: String,        // Public accessible URL
-    downloadedAt: Date,       // When image was downloaded
-    size: Number,             // File size in bytes
+    url: String,
+    filename: String,
+    localPath: String,
+    publicUrl: String,
+    downloadedAt: Date,
+    size: Number,
     zoom: {
       type: Number,
       default: 17
@@ -177,11 +165,7 @@ const sharpTurnSchema = new mongoose.Schema({
     }
   },
   
-  // ============================================================================
-  // IMAGE METADATA & TRACKING
-  // ============================================================================
-  
-  // Track overall image download status
+  // Image tracking
   imageDownloadInfo: {
     totalImages: {
       type: Number,
@@ -200,11 +184,7 @@ const sharpTurnSchema = new mongoose.Schema({
     }]
   },
   
-  // ============================================================================
-  // EXISTING FIELDS (Unchanged)
-  // ============================================================================
-  
-  // Live Links (kept as-is)
+  // Live Links
   streetViewLink: String,
   mapsLink: String,
   
@@ -221,7 +201,7 @@ const sharpTurnSchema = new mongoose.Schema({
   },
   bankingAngle: {
     type: Number,
-    default: 0 // Degrees of road banking
+    default: 0
   },
   elevation: Number,
   
@@ -285,31 +265,27 @@ sharpTurnSchema.index({ routeId: 1 });
 sharpTurnSchema.index({ riskScore: -1 });
 sharpTurnSchema.index({ turnSeverity: 1 });
 sharpTurnSchema.index({ distanceFromStartKm: 1 });
-sharpTurnSchema.index({ 'imageDownloadInfo.completedImages': 1 }); // NEW: Index for image tracking
+sharpTurnSchema.index({ 'imageDownloadInfo.completedImages': 1 });
 
-// ============================================================================
-// ENHANCED METHODS WITH IMAGE SUPPORT
-// ============================================================================
-
-// Pre-save validation with image tracking
+// Pre-save validation
 sharpTurnSchema.pre('save', function(next) {
   try {
-    // Handle straight turns (angle < 15 degrees)
+    // Handle straight turns
     if (this.turnAngle < 15) {
       this.turnDirection = 'straight';
       this.turnSeverity = 'gentle';
     }
     
-    // Validate and fix numeric fields
+    // Validate numeric fields
     if (isNaN(this.riskScore) || !isFinite(this.riskScore)) {
-      this.riskScore = 5; // Default medium risk
+      this.riskScore = 5;
     }
     
     if (isNaN(this.confidence) || !isFinite(this.confidence)) {
-      this.confidence = 0.8; // Default confidence
+      this.confidence = 0.8;
     }
     
-    // Auto-set severity based on angle if not set
+    // Auto-set severity
     if (!this.turnSeverity || this.turnSeverity === 'gentle') {
       if (this.turnAngle > 120) this.turnSeverity = 'hairpin';
       else if (this.turnAngle > 90) this.turnSeverity = 'sharp';
@@ -317,10 +293,9 @@ sharpTurnSchema.pre('save', function(next) {
       else this.turnSeverity = 'gentle';
     }
     
-    // NEW: Update image tracking information
+    // Update image tracking
     this.updateImageDownloadInfo();
     
-    // Update lastUpdated
     this.lastUpdated = new Date();
     
     next();
@@ -330,7 +305,7 @@ sharpTurnSchema.pre('save', function(next) {
   }
 });
 
-// NEW: Update image download tracking info
+// Update image download tracking
 sharpTurnSchema.methods.updateImageDownloadInfo = function() {
   if (!this.imageDownloadInfo) {
     this.imageDownloadInfo = {
@@ -343,28 +318,24 @@ sharpTurnSchema.methods.updateImageDownloadInfo = function() {
   let completedCount = 0;
   const imageTypes = [];
   
-  // Check street view image
   if (this.streetViewImage && this.streetViewImage.downloadStatus === 'completed') {
     completedCount++;
     imageTypes.push('street_view');
   }
   
-  // Check satellite image
   if (this.satelliteImage && this.satelliteImage.downloadStatus === 'completed') {
     completedCount++;
     imageTypes.push('satellite');
   }
   
-  // Check roadmap image
   if (this.roadmapImage && this.roadmapImage.downloadStatus === 'completed') {
     completedCount++;
     imageTypes.push('roadmap');
   }
   
-  // Check map image (legacy)
   if (this.mapImage && this.mapImage.downloadStatus === 'completed') {
     completedCount++;
-    if (!imageTypes.includes('roadmap')) { // Avoid duplicate if roadmap is also set
+    if (!imageTypes.includes('roadmap')) {
       imageTypes.push('map');
     }
   }
@@ -378,7 +349,7 @@ sharpTurnSchema.methods.updateImageDownloadInfo = function() {
   }
 };
 
-// Virtual for risk category (unchanged)
+// Virtuals
 sharpTurnSchema.virtual('riskCategory').get(function() {
   if (this.riskScore >= 8) return 'critical';
   if (this.riskScore >= 6) return 'high';
@@ -386,13 +357,12 @@ sharpTurnSchema.virtual('riskCategory').get(function() {
   return 'low';
 });
 
-// NEW: Virtual for image completion status
 sharpTurnSchema.virtual('imageCompletionStatus').get(function() {
   if (!this.imageDownloadInfo || this.imageDownloadInfo.completedImages === 0) {
     return 'no_images';
   }
   
-  const expectedImages = 3; // street_view, satellite, roadmap
+  const expectedImages = 3;
   const completed = this.imageDownloadInfo.completedImages;
   
   if (completed >= expectedImages) return 'complete';
@@ -401,12 +371,11 @@ sharpTurnSchema.virtual('imageCompletionStatus').get(function() {
   return 'no_images';
 });
 
-// NEW: Check if all images are downloaded
 sharpTurnSchema.virtual('hasAllImages').get(function() {
   return this.imageCompletionStatus === 'complete';
 });
 
-// Method to generate street view link (enhanced)
+// Methods
 sharpTurnSchema.methods.generateStreetViewLink = function() {
   const baseUrl = 'https://www.google.com/maps/@';
   const heading = this.streetViewImage?.heading || 0;
@@ -415,13 +384,11 @@ sharpTurnSchema.methods.generateStreetViewLink = function() {
   return this.streetViewLink;
 };
 
-// Method to generate maps link (unchanged)
 sharpTurnSchema.methods.generateMapsLink = function() {
   this.mapsLink = `https://www.google.com/maps/place/${this.latitude},${this.longitude}/@${this.latitude},${this.longitude},17z`;
   return this.mapsLink;
 };
 
-// NEW: Method to update image download status
 sharpTurnSchema.methods.updateImageStatus = function(imageType, status, imageData = {}) {
   const validTypes = ['streetView', 'satellite', 'roadmap', 'map'];
   const validStatuses = ['pending', 'downloading', 'completed', 'failed'];
@@ -454,7 +421,6 @@ sharpTurnSchema.methods.updateImageStatus = function(imageType, status, imageDat
   this.updateImageDownloadInfo();
 };
 
-// NEW: Method to get image summary
 sharpTurnSchema.methods.getImageSummary = function() {
   return {
     street_view: {
@@ -483,11 +449,9 @@ sharpTurnSchema.methods.getImageSummary = function() {
   };
 };
 
-// Enhanced safety recommendations method (unchanged)
 sharpTurnSchema.methods.getSafetyRecommendations = function() {
   const recommendations = [];
   
-  // Risk-based recommendations
   if (this.riskScore >= 8) {
     recommendations.push('CRITICAL: Reduce speed to 15-25 km/h');
     recommendations.push('Use convoy travel with constant communication');
@@ -497,7 +461,6 @@ sharpTurnSchema.methods.getSafetyRecommendations = function() {
     recommendations.push('Exercise extreme caution');
   }
   
-  // Turn-specific recommendations
   if (this.turnSeverity === 'hairpin') {
     recommendations.push('Hairpin turn: Use engine braking');
     recommendations.push('Stay in center of lane');
@@ -507,7 +470,6 @@ sharpTurnSchema.methods.getSafetyRecommendations = function() {
     recommendations.push('Position for maximum visibility');
   }
   
-  // Safety feature recommendations
   if (!this.guardrails) {
     recommendations.push('No guardrails: Exercise extra caution');
   }
@@ -524,8 +486,9 @@ sharpTurnSchema.methods.getSafetyRecommendations = function() {
   return recommendations;
 };
 
-// Enhanced static method for route analysis with image info
-SharpTurnSchema.statics.getRouteSharpTurnsAnalysis = function(routeId) {
+// ✅ CRITICAL FIX: Use sharpTurnSchema instead of SharpTurnSchema
+// Static method for route analysis
+sharpTurnSchema.statics.getRouteSharpTurnsAnalysis = function(routeId) {
   return this.aggregate([
     { $match: { routeId: mongoose.Types.ObjectId(routeId) } },
     {
@@ -567,7 +530,7 @@ SharpTurnSchema.statics.getRouteSharpTurnsAnalysis = function(routeId) {
   ]);
 };
 
-// NEW: Static method to get image download statistics
+// Static method to get image download statistics
 sharpTurnSchema.statics.getImageDownloadStats = function(routeId) {
   return this.aggregate([
     { $match: { routeId: new mongoose.Types.ObjectId(routeId) }},
@@ -595,18 +558,16 @@ sharpTurnSchema.statics.getImageDownloadStats = function(routeId) {
   ]);
 };
 
-// Transform JSON output with image info
+// Transform JSON output
 sharpTurnSchema.set('toJSON', {
   virtuals: true,
   transform: function(doc, ret) {
     delete ret.__v;
     delete ret._id;
     
-    // Ensure numeric fields are valid
     if (isNaN(ret.riskScore)) ret.riskScore = 5;
     if (isNaN(ret.confidence)) ret.confidence = 0.8;
     
-    // Add image summary to JSON output
     ret.imageSummary = doc.getImageSummary();
     
     return ret;
