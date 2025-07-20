@@ -49,14 +49,14 @@ class UnifiedDataCollectionService {
       //   servicesOffered: ['General Medicine', 'Consultation', 'Basic Treatment'],
       //   emergencyNumber: '108'
       // },
-      // 'pharmacy': { 
-      //   type: 'hospital', 
-      //   priority: 'medium', 
-      //   radius: 2000,
-      //   category: 'emergency_medical',
-      //   servicesOffered: ['Medicines', 'Medical Supplies', 'Health Products'],
-      //   emergencyNumber: '108'
-      // },
+      'pharmacy': { 
+        type: 'hospital', 
+        priority: 'medium', 
+        radius: 2000,
+        category: 'emergency_medical',
+        servicesOffered: ['Medicines', 'Medical Supplies', 'Health Products'],
+        emergencyNumber: '108'
+      },
 
       // ============================================================================
       // LAW ENFORCEMENT & SECURITY

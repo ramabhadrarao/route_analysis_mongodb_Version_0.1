@@ -47,7 +47,7 @@ class EnhancedWeatherService {
       console.log('🗑️ Cleared existing weather data');
 
       const seasonalResults = {};
-      const routeSegments = this.createRouteSegments(route.routePoints, 5);
+      const routeSegments = this.createRouteSegments(route.routePoints, 15);
       
       // Collect data for ALL seasons
       for (const [seasonName, seasonConfig] of Object.entries(this.seasonalRanges)) {
@@ -100,8 +100,7 @@ class EnhancedWeatherService {
     const currentYear = new Date().getFullYear();
     
     // Get historical data for this season from multiple years
-    // const years = [currentYear - 2, currentYear - 1, currentYear];
-    const years = [currentYear - 1, currentYear];
+    const years = [currentYear - 2, currentYear - 1, currentYear];
     
     for (const segment of routeSegments) {
       for (const year of years) {
