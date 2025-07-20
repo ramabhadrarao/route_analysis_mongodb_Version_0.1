@@ -33,30 +33,30 @@ class UnifiedDataCollectionService {
         servicesOffered: ['Emergency Care', 'Surgery', 'Diagnostics', 'ICU', 'Pharmacy'],
         emergencyNumber: '108'
       },
-      'emergency_room': { 
-        type: 'hospital', 
-        priority: 'critical', 
-        radius: 2000,
-        category: 'emergency_medical',
-        servicesOffered: ['Emergency Care', 'Trauma Care', 'Ambulance'],
-        emergencyNumber: '108'
-      },
-      'clinic': { 
-        type: 'hospital', 
-        priority: 'high', 
-        radius: 2000,
-        category: 'emergency_medical',
-        servicesOffered: ['General Medicine', 'Consultation', 'Basic Treatment'],
-        emergencyNumber: '108'
-      },
-      'pharmacy': { 
-        type: 'hospital', 
-        priority: 'medium', 
-        radius: 2000,
-        category: 'emergency_medical',
-        servicesOffered: ['Medicines', 'Medical Supplies', 'Health Products'],
-        emergencyNumber: '108'
-      },
+      // 'emergency_room': { 
+      //   type: 'hospital', 
+      //   priority: 'critical', 
+      //   radius: 2000,
+      //   category: 'emergency_medical',
+      //   servicesOffered: ['Emergency Care', 'Trauma Care', 'Ambulance'],
+      //   emergencyNumber: '108'
+      // },
+      // 'clinic': { 
+      //   type: 'hospital', 
+      //   priority: 'high', 
+      //   radius: 2000,
+      //   category: 'emergency_medical',
+      //   servicesOffered: ['General Medicine', 'Consultation', 'Basic Treatment'],
+      //   emergencyNumber: '108'
+      // },
+      // 'pharmacy': { 
+      //   type: 'hospital', 
+      //   priority: 'medium', 
+      //   radius: 2000,
+      //   category: 'emergency_medical',
+      //   servicesOffered: ['Medicines', 'Medical Supplies', 'Health Products'],
+      //   emergencyNumber: '108'
+      // },
 
       // ============================================================================
       // LAW ENFORCEMENT & SECURITY
@@ -104,22 +104,22 @@ class UnifiedDataCollectionService {
         hasRestroom: true,
         hasConvenienceStore: true
       },
-      'car_repair': { 
-        type: 'mechanic', 
-        priority: 'medium', 
-        radius: 2000,
-        category: 'fuel_vehicle',
-        servicesOffered: ['Engine Repair', 'Electrical', 'Body Work', 'Towing', 'Parts'],
-        equipment: ['Diagnostic Tools', 'Lifting Equipment', 'Welding']
-      },
-      'car_dealer': { 
-        type: 'mechanic', 
-        priority: 'low', 
-        radius: 2000,
-        category: 'fuel_vehicle',
-        servicesOffered: ['Sales', 'Service', 'Parts', 'Warranty'],
-        specializations: ['New Vehicles', 'Used Vehicles', 'Commercial Vehicles']
-      },
+      // 'car_repair': { 
+      //   type: 'mechanic', 
+      //   priority: 'medium', 
+      //   radius: 2000,
+      //   category: 'fuel_vehicle',
+      //   servicesOffered: ['Engine Repair', 'Electrical', 'Body Work', 'Towing', 'Parts'],
+      //   equipment: ['Diagnostic Tools', 'Lifting Equipment', 'Welding']
+      // },
+      // 'car_dealer': { 
+      //   type: 'mechanic', 
+      //   priority: 'low', 
+      //   radius: 2000,
+      //   category: 'fuel_vehicle',
+      //   servicesOffered: ['Sales', 'Service', 'Parts', 'Warranty'],
+      //   specializations: ['New Vehicles', 'Used Vehicles', 'Commercial Vehicles']
+      // },
 
       // ============================================================================
       // EDUCATIONAL INSTITUTIONS
@@ -195,87 +195,87 @@ class UnifiedDataCollectionService {
         parkingAvailable: true,
         truckFriendly: true,
         restFacilities: ['Rooms', 'Restrooms', 'Common Area']
-      },
+      }
 
       // ============================================================================
       // FINANCIAL SERVICES
       // ============================================================================
-      'bank': { 
-        type: 'amenity', 
-        priority: 'medium', 
-        radius: 2000,
-        category: 'financial',
-        servicesOffered: ['Cash Withdrawal', 'Deposits', 'Money Transfer', 'Account Services'],
-        financialServices: ['Banking', 'ATM', 'Money Exchange', 'Loans'],
-        accessibleHours: '10:00 AM - 4:00 PM'
-      },
-      'atm': { 
-        type: 'amenity', 
-        priority: 'high', 
-        radius: 2000,
-        category: 'financial',
-        servicesOffered: ['Cash Withdrawal', 'Balance Inquiry', 'Mini Statement'],
-        financialServices: ['24/7 Cash Withdrawal', 'Balance Check'],
-        accessibleHours: '24/7',
-        isOpen24Hours: true
-      },
-      'post_office': { 
-        type: 'amenity', 
-        priority: 'medium', 
-        radius: 2000,
-        category: 'financial',
-        servicesOffered: ['Mail Services', 'Money Order', 'Savings Account', 'Insurance'],
-        financialServices: ['Postal Services', 'Money Transfer', 'Government Services'],
-        accessibleHours: '10:00 AM - 5:00 PM'
-      },
+      // 'bank': { 
+      //   type: 'amenity', 
+      //   priority: 'medium', 
+      //   radius: 2000,
+      //   category: 'financial',
+      //   servicesOffered: ['Cash Withdrawal', 'Deposits', 'Money Transfer', 'Account Services'],
+      //   financialServices: ['Banking', 'ATM', 'Money Exchange', 'Loans'],
+      //   accessibleHours: '10:00 AM - 4:00 PM'
+      // },
+      // 'atm': { 
+      //   type: 'amenity', 
+      //   priority: 'high', 
+      //   radius: 2000,
+      //   category: 'financial',
+      //   servicesOffered: ['Cash Withdrawal', 'Balance Inquiry', 'Mini Statement'],
+      //   financialServices: ['24/7 Cash Withdrawal', 'Balance Check'],
+      //   accessibleHours: '24/7',
+      //   isOpen24Hours: true
+      // },
+      // 'post_office': { 
+      //   type: 'amenity', 
+      //   priority: 'medium', 
+      //   radius: 2000,
+      //   category: 'financial',
+      //   servicesOffered: ['Mail Services', 'Money Order', 'Savings Account', 'Insurance'],
+      //   financialServices: ['Postal Services', 'Money Transfer', 'Government Services'],
+      //   accessibleHours: '10:00 AM - 5:00 PM'
+      // },
 
       // ============================================================================
       // TRANSPORTATION HUBS
       // ============================================================================
-      'bus_station': { 
-        type: 'transport', 
-        priority: 'medium', 
-        radius: 2000,
-        category: 'transportation',
-        servicesOffered: ['Bus Transport', 'Ticketing', 'Waiting Area', 'Information'],
-        hubType: 'bus_station',
-        transportModes: ['Local Bus', 'Interstate Bus', 'Private Bus'],
-        connectivity: 'Regional',
-        facilities: ['Waiting Area', 'Ticket Counter', 'Restrooms', 'Food Court']
-      },
-      'train_station': { 
-        type: 'transport', 
-        priority: 'medium', 
-        radius: 2000,
-        category: 'transportation',
-        servicesOffered: ['Train Transport', 'Booking', 'Platform Access', 'Porters'],
-        hubType: 'train_station',
-        transportModes: ['Local Train', 'Express Train', 'Passenger Train'],
-        connectivity: 'National',
-        facilities: ['Platform', 'Booking Office', 'Waiting Room', 'Parking']
-      },
-      'airport': { 
-        type: 'transport', 
-        priority: 'low', 
-        radius: 2000,
-        category: 'transportation',
-        servicesOffered: ['Air Transport', 'Check-in', 'Security', 'Customs'],
-        hubType: 'airport',
-        transportModes: ['Domestic Flights', 'International Flights'],
-        connectivity: 'International',
-        facilities: ['Terminal', 'Check-in', 'Security', 'Lounges', 'Duty Free']
-      },
-      'taxi_stand': { 
-        type: 'transport', 
-        priority: 'medium', 
-        radius: 2000,
-        category: 'transportation',
-        servicesOffered: ['Local Transport', 'Taxi Service', 'Auto Rickshaw'],
-        hubType: 'taxi_stand',
-        transportModes: ['Local Taxi', 'Auto Rickshaw', 'Cab Services'],
-        connectivity: 'Local',
-        facilities: ['Waiting Area', 'Fare Chart', 'Phone Booking']
-      }
+      // 'bus_station': { 
+      //   type: 'transport', 
+      //   priority: 'medium', 
+      //   radius: 2000,
+      //   category: 'transportation',
+      //   servicesOffered: ['Bus Transport', 'Ticketing', 'Waiting Area', 'Information'],
+      //   hubType: 'bus_station',
+      //   transportModes: ['Local Bus', 'Interstate Bus', 'Private Bus'],
+      //   connectivity: 'Regional',
+      //   facilities: ['Waiting Area', 'Ticket Counter', 'Restrooms', 'Food Court']
+      // },
+      // 'train_station': { 
+      //   type: 'transport', 
+      //   priority: 'medium', 
+      //   radius: 2000,
+      //   category: 'transportation',
+      //   servicesOffered: ['Train Transport', 'Booking', 'Platform Access', 'Porters'],
+      //   hubType: 'train_station',
+      //   transportModes: ['Local Train', 'Express Train', 'Passenger Train'],
+      //   connectivity: 'National',
+      //   facilities: ['Platform', 'Booking Office', 'Waiting Room', 'Parking']
+      // },
+      // 'airport': { 
+      //   type: 'transport', 
+      //   priority: 'low', 
+      //   radius: 2000,
+      //   category: 'transportation',
+      //   servicesOffered: ['Air Transport', 'Check-in', 'Security', 'Customs'],
+      //   hubType: 'airport',
+      //   transportModes: ['Domestic Flights', 'International Flights'],
+      //   connectivity: 'International',
+      //   facilities: ['Terminal', 'Check-in', 'Security', 'Lounges', 'Duty Free']
+      // },
+      // 'taxi_stand': { 
+      //   type: 'transport', 
+      //   priority: 'medium', 
+      //   radius: 2000,
+      //   category: 'transportation',
+      //   servicesOffered: ['Local Transport', 'Taxi Service', 'Auto Rickshaw'],
+      //   hubType: 'taxi_stand',
+      //   transportModes: ['Local Taxi', 'Auto Rickshaw', 'Cab Services'],
+      //   connectivity: 'Local',
+      //   facilities: ['Waiting Area', 'Fare Chart', 'Phone Booking']
+      // }
     };
   }
 

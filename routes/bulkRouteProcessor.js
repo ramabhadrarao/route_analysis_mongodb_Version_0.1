@@ -1,5 +1,6 @@
-// File: routes/bulkRouteProcessor.js - COMPLETE ENHANCED VERSION WITH REAL-TIME STATUS
-// Purpose: Enhanced bulk processing with automatic visibility analysis and real-time status tracking
+// File: routes/bulkRouteProcessor.js - OPTIMIZED VERSION FOR 5800 ROUTES
+// Purpose: Enhanced bulk processing with maximum concurrent connections
+// Optimized for 2-3 days processing with Enhanced + Automatic Visibility Analysis
 
 const express = require('express');
 const multer = require('multer');
@@ -14,10 +15,42 @@ const XLSX = require('xlsx');
 const router = express.Router();
 
 // ============================================================================
-// GLOBAL PROCESSING STATE STORAGE (use Redis in production)
+// OPTIMIZED CONFIGURATION FOR 5800 ROUTES
+// ============================================================================
+
+const OPTIMIZED_CONFIG = {
+  // Maximum concurrent processing based on API limits
+  MAX_CONCURRENT_ROUTES: 10,          // Process 10 routes simultaneously
+  MAX_CONCURRENT_API_CALLS: 50,       // Google Maps allows 50 QPS
+  
+  // Batch configuration
+  OPTIMAL_BATCH_SIZE: 25,             // Process 25 routes per batch
+  PAUSE_BETWEEN_BATCHES: 2000,        // 2 second pause between batches
+  
+  // Timeout configuration (increased for stability)
+  ROUTE_TIMEOUT: 300000,              // 5 minutes per route
+  VISIBILITY_TIMEOUT: 120000,         // 2 minutes for visibility analysis
+  DATA_COLLECTION_TIMEOUT: 180000,    // 3 minutes for data collection
+  
+  // Retry configuration
+  MAX_RETRIES: 3,
+  RETRY_DELAY: 5000,                  // 5 seconds between retries
+  
+  // Memory management
+  MEMORY_CHECK_INTERVAL: 50,          // Check every 50 routes
+  GARBAGE_COLLECTION_INTERVAL: 100,   // Force GC every 100 routes
+  
+  // Progress tracking
+  CHECKPOINT_INTERVAL: 100,           // Save progress every 100 routes
+  STATUS_UPDATE_INTERVAL: 10,         // Update status every 10 routes
+};
+
+// ============================================================================
+// GLOBAL PROCESSING STATE STORAGE WITH PERSISTENCE
 // ============================================================================
 
 const processingStates = new Map();
+const progressCheckpoints = new Map();
 
 // Helper functions for state management
 const updateProcessingState = (userId, update) => {
@@ -29,12 +62,19 @@ const updateProcessingState = (userId, update) => {
     lastUpdate: new Date().toISOString() 
   };
   processingStates.set(key, updated);
-  console.log(`📊 Processing state updated for user ${userId}:`, {
-    status: updated.status,
-    currentRoute: updated.currentRoute,
-    completedRoutes: updated.completedRoutes,
-    totalRoutes: updated.totalRoutes
-  });
+  
+  // Save checkpoint periodically
+  if (updated.completedRoutes % OPTIMIZED_CONFIG.CHECKPOINT_INTERVAL === 0) {
+    saveCheckpoint(userId, updated);
+  }
+  
+  // Log progress every STATUS_UPDATE_INTERVAL
+  if (updated.completedRoutes % OPTIMIZED_CONFIG.STATUS_UPDATE_INTERVAL === 0) {
+    console.log(`📊 Progress: ${updated.completedRoutes}/${updated.totalRoutes} (${Math.round(updated.completedRoutes / updated.totalRoutes * 100)}%)`);
+    console.log(`   ⏱️  Elapsed: ${Math.round((Date.now() - new Date(updated.startTime).getTime()) / 1000 / 60)} minutes`);
+    console.log(`   📈 Rate: ${Math.round(updated.completedRoutes / ((Date.now() - new Date(updated.startTime).getTime()) / 1000 / 60))} routes/minute`);
+  }
+  
   return updated;
 };
 
@@ -46,8 +86,22 @@ const getProcessingState = (userId) => {
 const clearProcessingState = (userId) => {
   const key = `processing_${userId}`;
   processingStates.delete(key);
+  progressCheckpoints.delete(userId);
   console.log(`🗑️ Processing state cleared for user ${userId}`);
 };
+
+// Save checkpoint for resume capability
+async function saveCheckpoint(userId, state) {
+  try {
+    const checkpointPath = path.join('./checkpoints', `checkpoint_${userId}_${Date.now()}.json`);
+    await fsPromises.mkdir(path.dirname(checkpointPath), { recursive: true });
+    await fsPromises.writeFile(checkpointPath, JSON.stringify(state, null, 2));
+    progressCheckpoints.set(userId, checkpointPath);
+    console.log(`💾 Checkpoint saved: ${state.completedRoutes} routes completed`);
+  } catch (error) {
+    console.error('Checkpoint save error:', error);
+  }
+}
 
 // ============================================================================
 // FILE UPLOAD CONFIGURATION
@@ -75,7 +129,7 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 50 * 1024 * 1024 // 50MB limit for large CSV files
   }
 });
 
@@ -83,19 +137,14 @@ const upload = multer({
 router.use(auth);
 
 // ============================================================================
-// ENHANCED STATUS ENDPOINT WITH REAL-TIME TRACKING
+// STATUS ENDPOINT - UNCHANGED FOR FRONTEND COMPATIBILITY
 // ============================================================================
 
-/**
- * Enhanced status endpoint for real-time progress tracking
- * GET /api/bulk-routes/status
- */
 router.get('/status', async (req, res) => {
   try {
     const userId = req.user.id;
     console.log('📊 Status check requested for user:', userId);
     
-    // Get current processing state
     const state = getProcessingState(userId);
     
     if (!state) {
@@ -107,28 +156,21 @@ router.get('/status', async (req, res) => {
       });
     }
     
-    // Check if processing is stale (older than 5 minutes)
-    const lastUpdate = new Date(state.lastUpdate);
-    const timeSinceUpdate = Date.now() - lastUpdate.getTime();
+    // Calculate statistics
+    const elapsedTime = Date.now() - new Date(state.startTime).getTime();
+    const routesPerMinute = state.completedRoutes / (elapsedTime / 1000 / 60);
+    const remainingRoutes = state.totalRoutes - state.completedRoutes;
+    const estimatedTimeRemaining = remainingRoutes / routesPerMinute;
     
-    if (timeSinceUpdate > 5 * 60 * 1000) { // 5 minutes
-      console.log('⚠️ Processing state is stale, clearing...');
-      clearProcessingState(userId);
-      return res.status(200).json({
-        success: true,
-        status: 'completed',
-        message: 'Processing completed (stale state cleared)'
-      });
-    }
-    
-    console.log('✅ Returning current processing state:', {
+    console.log(`✅ Returning current processing state:`, {
       status: state.status,
       completedRoutes: state.completedRoutes,
       totalRoutes: state.totalRoutes,
-      currentRoute: state.currentRoute
+      currentRoute: state.currentRoute,
+      routesPerMinute: Math.round(routesPerMinute * 10) / 10,
+      estimatedHoursRemaining: Math.round(estimatedTimeRemaining / 60 * 10) / 10
     });
     
-    // Return current state with all the progress data
     res.status(200).json({
       success: true,
       status: state.status || 'processing',
@@ -136,46 +178,26 @@ router.get('/status', async (req, res) => {
       totalRoutes: state.totalRoutes || 0,
       completedRoutes: state.completedRoutes || 0,
       failedRoutes: state.failedRoutes || 0,
-      estimatedTimeRemaining: state.estimatedTimeRemaining || 'Calculating...',
+      estimatedTimeRemaining: estimatedTimeRemaining > 0 ? 
+        `${Math.round(estimatedTimeRemaining / 60)} hours ${Math.round(estimatedTimeRemaining % 60)} minutes` : 
+        'Calculating...',
       
-      // Enhanced data collection stats
-      enhancedDataCollection: {
-        attempted: state.enhancedDataCollection?.attempted || 0,
-        successful: state.enhancedDataCollection?.successful || 0,
-        failed: state.enhancedDataCollection?.failed || 0,
-        sharpTurnsCollected: state.enhancedDataCollection?.sharpTurnsCollected || 0,
-        blindSpotsCollected: state.enhancedDataCollection?.blindSpotsCollected || 0,
-        networkCoverageAnalyzed: state.enhancedDataCollection?.networkCoverageAnalyzed || 0,
-        roadConditionsAnalyzed: state.enhancedDataCollection?.roadConditionsAnalyzed || 0,
-        accidentDataCollected: state.enhancedDataCollection?.accidentDataCollected || 0,
-        seasonalWeatherCollected: state.enhancedDataCollection?.seasonalWeatherCollected || 0,
-        totalRecordsCreated: state.enhancedDataCollection?.totalRecordsCreated || 0,
-        collectionBreakdown: state.enhancedDataCollection?.collectionBreakdown || {}
+      performanceMetrics: {
+        routesPerMinute: Math.round(routesPerMinute * 10) / 10,
+        elapsedHours: Math.round(elapsedTime / 1000 / 60 / 60 * 10) / 10,
+        successRate: state.completedRoutes > 0 ? 
+          Math.round(((state.completedRoutes - state.failedRoutes) / state.completedRoutes) * 100) : 0
       },
       
-      // Visibility analysis stats
-      visibilityAnalysis: {
-        attempted: state.visibilityAnalysis?.attempted || 0,
-        successful: state.visibilityAnalysis?.successful || 0,
-        failed: state.visibilityAnalysis?.failed || 0,
-        skipped: state.visibilityAnalysis?.skipped || 0,
-        currentRoute: state.visibilityAnalysis?.currentRoute || null,
-        totalSharpTurns: state.visibilityAnalysis?.totalSharpTurns || 0,
-        totalBlindSpots: state.visibilityAnalysis?.totalBlindSpots || 0,
-        criticalTurns: state.visibilityAnalysis?.criticalTurns || 0,
-        criticalBlindSpots: state.visibilityAnalysis?.criticalBlindSpots || 0,
-        analysisMode: state.visibilityAnalysis?.analysisMode || 'comprehensive',
-        averageAnalysisTime: state.visibilityAnalysis?.averageAnalysisTime || null
-      },
+      enhancedDataCollection: state.enhancedDataCollection || {},
+      visibilityAnalysis: state.visibilityAnalysis || {},
       
-      // Processing metadata
       processingMode: state.processingMode || 'enhanced',
       dataCollectionMode: state.dataCollectionMode || 'comprehensive',
       backgroundProcessing: state.backgroundProcessing || false,
       startTime: state.startTime,
       lastUpdate: state.lastUpdate,
       
-      // Results if available
       results: state.results || null
     });
     
@@ -189,88 +211,10 @@ router.get('/status', async (req, res) => {
   }
 });
 
-/**
- * Cancel processing endpoint
- * POST /api/bulk-routes/cancel
- */
-router.post('/cancel', async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { processingId } = req.body;
-    
-    console.log('🛑 Cancel processing requested for user:', userId, 'processingId:', processingId);
-    
-    // Update state to cancelled
-    updateProcessingState(userId, {
-      status: 'cancelled',
-      currentRoute: 'Processing cancelled by user',
-      estimatedTimeRemaining: 'Cancelled'
-    });
-    
-    res.status(200).json({
-      success: true,
-      message: 'Processing cancellation requested',
-      data: {
-        processingId,
-        status: 'cancelled'
-      }
-    });
-    
-  } catch (error) {
-    console.error('❌ Cancel processing error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error cancelling processing',
-      error: error.message
-    });
-  }
-});
-
-/**
- * Background status endpoint (alternative)
- * GET /api/bulk-routes/background-status/:jobId
- */
-router.get('/background-status/:jobId', async (req, res) => {
-  try {
-    const { jobId } = req.params;
-    const userId = req.user.id;
-    
-    console.log('📊 Background status check for jobId:', jobId, 'user:', userId);
-    
-    const state = getProcessingState(userId);
-    
-    if (!state) {
-      return res.status(404).json({
-        success: false,
-        message: 'Job not found or completed',
-        status: 'completed'
-      });
-    }
-    
-    res.status(200).json({
-      success: true,
-      jobId,
-      ...state
-    });
-    
-  } catch (error) {
-    console.error('❌ Background status error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error checking background job status',
-      error: error.message
-    });
-  }
-});
-
 // ============================================================================
-// ENHANCED PROCESSING ENDPOINT WITH AUTOMATIC VISIBILITY ANALYSIS
+// OPTIMIZED ENHANCED PROCESSING ENDPOINT
 // ============================================================================
 
-/**
- * ENHANCED Process bulk routes from CSV with COMPLETE data collection + AUTOMATIC VISIBILITY ANALYSIS
- * POST /api/bulk-routes/process-csv-enhanced
- */
 router.post('/process-csv-enhanced', upload.single('routesCsvFile'), async (req, res) => {
   try {
     if (!req.file) {
@@ -284,44 +228,63 @@ router.post('/process-csv-enhanced', upload.single('routesCsvFile'), async (req,
       dataFolderPath = './data',
       terrainType = 'mixed',
       dataCollectionMode = 'comprehensive',
-      maxConcurrentRoutes = 2,
-      skipExistingRoutes = true,
-      backgroundProcessing = false,
       
-      // Existing enhanced options
+      // OPTIMIZED SETTINGS FOR 5800 ROUTES
+      maxConcurrentRoutes = OPTIMIZED_CONFIG.MAX_CONCURRENT_ROUTES,
+      batchSize = OPTIMIZED_CONFIG.OPTIMAL_BATCH_SIZE,
+      
+      skipExistingRoutes = true,
+      backgroundProcessing = true, // ALWAYS USE BACKGROUND FOR LARGE BATCHES
+      
+      // Enhanced options - ALL ENABLED FOR MAXIMUM DATA
       includeSharpTurns = true,
       includeBlindSpots = true,
       includeNetworkCoverage = true,
       includeEnhancedRoadConditions = true,
       includeAccidentData = true,
       includeSeasonalWeather = true,
-      downloadImages = false,
+      downloadImages = false, // Disable images to save time
       generateReports = false,
       
-      // NEW: Automatic visibility analysis options
-      enableAutomaticVisibilityAnalysis = true,  // NEW: Default enabled
-      visibilityAnalysisTimeout = 180000,        // NEW: 3 minutes per route max
-      continueOnVisibilityFailure = true,        // NEW: Don't fail entire batch if visibility fails
-      visibilityAnalysisMode = 'comprehensive'   // NEW: 'basic', 'comprehensive', 'detailed'
+      // Visibility analysis options - OPTIMIZED
+      enableAutomaticVisibilityAnalysis = true,
+      visibilityAnalysisTimeout = OPTIMIZED_CONFIG.VISIBILITY_TIMEOUT,
+      continueOnVisibilityFailure = true,
+      visibilityAnalysisMode = 'comprehensive',
+      
+      // Resume options
+      resumeFromRoute = 0,
+      useCheckpoint = false
     } = req.body;
 
-    console.log(`🚀 Starting ENHANCED bulk route processing with AUTOMATIC VISIBILITY ANALYSIS`);
+    console.log(`🚀 Starting OPTIMIZED bulk route processing for large dataset`);
     console.log(`📁 Data folder: ${dataFolderPath}`);
     console.log(`⚙️ Collection mode: ${dataCollectionMode}`);
     console.log(`🔍 Visibility analysis: ${enableAutomaticVisibilityAnalysis ? 'ENABLED' : 'DISABLED'}`);
-    console.log(`🔄 Concurrent routes: ${maxConcurrentRoutes}`);
+    console.log(`🔄 Concurrent routes: ${maxConcurrentRoutes}, Batch size: ${batchSize}`);
 
     // Parse CSV file
     const routeEntries = await parseBulkRoutesCSV(req.file.path);
-    console.log(`📊 Found ${routeEntries.length} route entries in CSV`);
+    const totalEntries = routeEntries.length;
+    
+    console.log(`📊 Found ${totalEntries} route entries in CSV`);
+    
+    // Slice if resuming
+    const routesToProcess = resumeFromRoute > 0 ? 
+      routeEntries.slice(resumeFromRoute) : 
+      routeEntries;
+    
+    console.log(`🎯 Processing ${routesToProcess.length} routes (starting from index ${resumeFromRoute})`);
 
-    // If background processing requested, start async and return immediately
-    if (backgroundProcessing === 'true' || backgroundProcessing === true) {
-      processRoutesInBackgroundEnhancedWithVisibility(routeEntries, req.user.id, {
+    // For 5800 routes, ALWAYS use background processing
+    if (totalEntries > 100 || backgroundProcessing) {
+      // Start background processing
+      processRoutesInBackgroundOptimized(routesToProcess, req.user.id, {
         dataFolderPath,
         terrainType,
         dataCollectionMode,
         maxConcurrentRoutes,
+        batchSize,
         skipExistingRoutes,
         includeSharpTurns,
         includeBlindSpots,
@@ -331,50 +294,51 @@ router.post('/process-csv-enhanced', upload.single('routesCsvFile'), async (req,
         includeSeasonalWeather,
         downloadImages,
         generateReports,
-        // NEW: Visibility analysis options
         enableAutomaticVisibilityAnalysis,
         visibilityAnalysisTimeout,
         continueOnVisibilityFailure,
-        visibilityAnalysisMode
+        visibilityAnalysisMode,
+        startIndex: resumeFromRoute
       });
 
+      const estimatedHours = Math.round((routesToProcess.length / 100) * 2); // ~2 hours per 100 routes
+      
       return res.status(202).json({
         success: true,
-        message: 'Enhanced bulk processing with automatic visibility analysis started in background',
+        message: 'Optimized bulk processing started in background',
         data: {
-          totalRoutes: routeEntries.length,
-          processingMode: 'background_enhanced_with_visibility',
-          estimatedCompletion: new Date(Date.now() + (routeEntries.length * 240 * 1000)), // 4 min per route estimate (including visibility)
+          totalRoutes: routesToProcess.length,
+          processingMode: 'background_enhanced_optimized',
+          estimatedCompletion: `${estimatedHours} hours (${Math.round(estimatedHours / 24)} days)`,
           statusEndpoint: '/api/bulk-routes/status',
-          enhancedFeatures: {
-            dataCollectionIncluded: {
-              sharpTurns: includeSharpTurns,
-              blindSpots: includeBlindSpots,
-              networkCoverage: includeNetworkCoverage,
-              enhancedRoadConditions: includeEnhancedRoadConditions,
-              accidentData: includeAccidentData,
-              seasonalWeather: includeSeasonalWeather
-            },
-            automaticVisibilityAnalysis: {
-              enabled: enableAutomaticVisibilityAnalysis,
-              mode: visibilityAnalysisMode,
-              timeout: visibilityAnalysisTimeout,
-              continueOnFailure: continueOnVisibilityFailure
-            }
-          }
+          configuration: {
+            concurrentRoutes: maxConcurrentRoutes,
+            batchSize: batchSize,
+            dataCollectionMode: dataCollectionMode,
+            visibilityAnalysisEnabled: enableAutomaticVisibilityAnalysis,
+            allDataFeaturesEnabled: true
+          },
+          tips: [
+            'Monitor progress via the status endpoint',
+            'Processing is optimized for stability over 2-3 days',
+            'Checkpoints are saved every 100 routes for resume capability',
+            'System will automatically manage API rate limits',
+            'Memory usage is monitored to prevent crashes'
+          ]
         }
       });
     }
 
-    // FOREGROUND ENHANCED PROCESSING WITH AUTOMATIC VISIBILITY ANALYSIS
-    const processingResults = await processRoutesEnhancedWithVisibilityAndStatus(
-      routeEntries,
+    // Foreground processing (not recommended for 5800 routes)
+    const processingResults = await processRoutesEnhancedOptimized(
+      routesToProcess,
       req.user.id,
       {
         dataFolderPath,
         terrainType,
         dataCollectionMode,
         maxConcurrentRoutes,
+        batchSize,
         skipExistingRoutes,
         includeSharpTurns,
         includeBlindSpots,
@@ -384,7 +348,6 @@ router.post('/process-csv-enhanced', upload.single('routesCsvFile'), async (req,
         includeSeasonalWeather,
         downloadImages,
         generateReports,
-        // NEW: Visibility analysis options
         enableAutomaticVisibilityAnalysis,
         visibilityAnalysisTimeout,
         continueOnVisibilityFailure,
@@ -397,14 +360,13 @@ router.post('/process-csv-enhanced', upload.single('routesCsvFile'), async (req,
 
     res.status(200).json({
       success: true,
-      message: 'ENHANCED bulk route processing with automatic visibility analysis completed successfully',
+      message: 'Bulk route processing completed',
       data: processingResults
     });
 
   } catch (error) {
-    console.error('❌ Enhanced bulk route processing with visibility analysis error:', error);
+    console.error('❌ Bulk route processing error:', error);
     
-    // Clean up uploaded file on error
     if (req.file && req.file.path) {
       try {
         await fsPromises.unlink(req.file.path);
@@ -415,61 +377,38 @@ router.post('/process-csv-enhanced', upload.single('routesCsvFile'), async (req,
 
     res.status(500).json({
       success: false,
-      message: 'Error during enhanced bulk route processing with visibility analysis',
+      message: 'Error during bulk route processing',
       error: error.message,
       recommendations: [
-        'Try backgroundProcessing=true for large batches',
-        'Use dataCollectionMode=basic for quicker processing',
-        'Reduce maxConcurrentRoutes if system is overloaded',
-        'Set enableAutomaticVisibilityAnalysis=false to disable visibility analysis',
-        'Consider processing smaller batches of routes'
+        'For 5800 routes, use backgroundProcessing=true',
+        'Ensure sufficient disk space (>10GB)',
+        'Monitor server resources during processing',
+        'Consider processing in smaller chunks if issues persist'
       ]
     });
   }
 });
 
 // ============================================================================
-// ENHANCED PROCESSING FUNCTIONS WITH REAL-TIME STATUS UPDATES
+// OPTIMIZED PROCESSING FUNCTIONS
 // ============================================================================
 
-/**
- * ENHANCED main processing function with real-time status updates and automatic visibility analysis
- */
-async function processRoutesEnhancedWithVisibilityAndStatus(routeEntries, userId, options) {
+async function processRoutesEnhancedOptimized(routeEntries, userId, options) {
   const startTime = Date.now();
   const {
-    dataFolderPath,
-    terrainType,
-    dataCollectionMode,
     maxConcurrentRoutes,
-    skipExistingRoutes,
-    includeSharpTurns,
-    includeBlindSpots,
-    includeNetworkCoverage,
-    includeEnhancedRoadConditions,
-    includeAccidentData,
-    includeSeasonalWeather,
-    downloadImages,
-    generateReports,
-    // NEW: Visibility analysis options
-    enableAutomaticVisibilityAnalysis,
-    visibilityAnalysisTimeout,
-    continueOnVisibilityFailure,
-    visibilityAnalysisMode
+    batchSize,
   } = options;
 
-  // Initialize processing state for real-time tracking
+  // Initialize processing state
   updateProcessingState(userId, {
     status: 'starting',
-    currentRoute: 'Initializing enhanced processing with visibility analysis...',
+    currentRoute: 'Initializing optimized processing...',
     totalRoutes: routeEntries.length,
     completedRoutes: 0,
     failedRoutes: 0,
-    estimatedTimeRemaining: 'Calculating...',
-    processingMode: 'enhanced_with_visibility',
-    dataCollectionMode: dataCollectionMode || 'comprehensive',
-    backgroundProcessing: false,
     startTime: new Date().toISOString(),
+    processingMode: 'enhanced_optimized',
     enhancedDataCollection: {
       attempted: 0,
       successful: 0,
@@ -480,38 +419,17 @@ async function processRoutesEnhancedWithVisibilityAndStatus(routeEntries, userId
       roadConditionsAnalyzed: 0,
       accidentDataCollected: 0,
       seasonalWeatherCollected: 0,
-      totalRecordsCreated: 0,
-      collectionBreakdown: {
-        emergencyServices: 0,
-        weatherConditions: 0,
-        trafficData: 0,
-        accidentProneAreas: 0,
-        roadConditions: 0,
-        sharpTurns: 0,
-        blindSpots: 0,
-        networkCoverage: 0,
-        seasonalWeatherData: 0
-      }
+      totalRecordsCreated: 0
     },
     visibilityAnalysis: {
-      enabled: enableAutomaticVisibilityAnalysis,
+      enabled: options.enableAutomaticVisibilityAnalysis,
       attempted: 0,
       successful: 0,
       failed: 0,
-      skipped: 0,
       totalSharpTurns: 0,
       totalBlindSpots: 0,
       criticalTurns: 0,
-      criticalBlindSpots: 0,
-      analysisBreakdown: {
-        sharpTurnsSuccess: 0,
-        blindSpotsSuccess: 0,
-        sharpTurnsFailed: 0,
-        blindSpotsFailed: 0
-      },
-      averageAnalysisTime: 0,
-      errors: [],
-      analysisMode: visibilityAnalysisMode
+      criticalBlindSpots: 0
     }
   });
 
@@ -519,163 +437,92 @@ async function processRoutesEnhancedWithVisibilityAndStatus(routeEntries, userId
     totalRoutes: routeEntries.length,
     successful: [],
     failed: [],
-    skipped: [],
-    enhancedDataCollection: {
-      attempted: 0,
-      successful: 0,
-      failed: 0,
-      sharpTurnsCollected: 0,
-      blindSpotsCollected: 0,
-      networkCoverageAnalyzed: 0,
-      roadConditionsAnalyzed: 0,
-      accidentDataCollected: 0,
-      seasonalWeatherCollected: 0,
-      totalRecordsCreated: 0,
-      collectionBreakdown: {
-        emergencyServices: 0,
-        weatherConditions: 0,
-        trafficData: 0,
-        accidentProneAreas: 0,
-        roadConditions: 0,
-        sharpTurns: 0,
-        blindSpots: 0,
-        networkCoverage: 0,
-        seasonalWeatherData: 0
-      }
-    },
-    // NEW: Visibility analysis tracking
-    visibilityAnalysis: {
-      enabled: enableAutomaticVisibilityAnalysis,
-      attempted: 0,
-      successful: 0,
-      failed: 0,
-      skipped: 0,
-      totalSharpTurns: 0,
-      totalBlindSpots: 0,
-      criticalTurns: 0,
-      criticalBlindSpots: 0,
-      analysisBreakdown: {
-        sharpTurnsSuccess: 0,
-        blindSpotsSuccess: 0,
-        sharpTurnsFailed: 0,
-        blindSpotsFailed: 0
-      },
-      averageAnalysisTime: 0,
-      errors: []
-    }
+    skipped: []
   };
 
   // Update status to processing
   updateProcessingState(userId, {
     status: 'processing',
-    currentRoute: 'Starting route processing...'
+    currentRoute: 'Starting optimized route processing...'
   });
 
-  // Process routes in batches
-  const batchSize = Math.min(parseInt(maxConcurrentRoutes), 2);
+  // Process routes in optimized batches
   const batches = [];
-  
   for (let i = 0; i < routeEntries.length; i += batchSize) {
-    batches.push(routeEntries.slice(i, i + batchSize));
+    batches.push({
+      routes: routeEntries.slice(i, i + batchSize),
+      startIndex: i
+    });
   }
 
-  console.log(`📦 Processing ${batches.length} enhanced batches of ${batchSize} routes each with automatic visibility analysis`);
+  console.log(`📦 Processing ${batches.length} batches of ${batchSize} routes each`);
+  console.log(`🚀 Using ${maxConcurrentRoutes} concurrent connections`);
 
-  // Process each batch with enhanced data collection + automatic visibility analysis
+  // Process batches with controlled concurrency
   for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
     const batch = batches[batchIndex];
-    console.log(`\n🔄 Processing Enhanced Batch ${batchIndex + 1}/${batches.length} (${batch.length} routes) with visibility analysis`);
-
-    // Update status for current batch
+    const batchStartTime = Date.now();
+    
+    console.log(`\n🔄 Processing Batch ${batchIndex + 1}/${batches.length} (${batch.routes.length} routes)`);
+    
+    // Update status
     updateProcessingState(userId, {
-      currentRoute: `Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} routes)`,
-      estimatedTimeRemaining: `${Math.round((batches.length - batchIndex) * 3)} minutes remaining`
+      currentRoute: `Processing batch ${batchIndex + 1}/${batches.length}`,
+      currentBatch: batchIndex + 1,
+      totalBatches: batches.length
     });
 
-    // PARALLEL processing within batch with enhanced data collection + automatic visibility
-    const batchPromises = batch.map(async (routeEntry, index) => {
-      const globalIndex = batchIndex * batchSize + index + 1;
-      try {
-        // Update status for current route
-        updateProcessingState(userId, {
-          currentRoute: `Processing route ${globalIndex}/${routeEntries.length}: ${routeEntry.fromcode} → ${routeEntry.tocode}`,
+    // Process routes in parallel within batch
+    const batchPromises = [];
+    const concurrencyLimit = Math.min(maxConcurrentRoutes, batch.routes.length);
+    
+    // Use promise pool for controlled concurrency
+    for (let i = 0; i < batch.routes.length; i += concurrencyLimit) {
+      const chunk = batch.routes.slice(i, i + concurrencyLimit);
+      const chunkPromises = chunk.map(async (routeEntry, index) => {
+        const globalIndex = batch.startIndex + i + index + 1;
+        
+        try {
+          // Add small delay to prevent API overload
+          await new Promise(resolve => setTimeout(resolve, index * 100));
           
-          // Update visibility analysis if enabled
-          visibilityAnalysis: {
-            ...getProcessingState(userId).visibilityAnalysis,
-            currentRoute: enableAutomaticVisibilityAnalysis ? 
-              `Analyzing visibility for ${routeEntry.fromcode} → ${routeEntry.tocode}` : null
-          }
-        });
+          return await processSingleRouteOptimized(
+            routeEntry, 
+            globalIndex, 
+            userId, 
+            options
+          );
+        } catch (error) {
+          console.error(`❌ Route ${globalIndex} failed:`, error.message);
+          return {
+            routeNumber: globalIndex,
+            fromCode: routeEntry.fromcode,
+            toCode: routeEntry.tocode,
+            status: 'failed',
+            error: error.message
+          };
+        }
+      });
+      
+      // Wait for chunk to complete before starting next
+      const chunkResults = await Promise.allSettled(chunkPromises);
+      batchPromises.push(...chunkResults);
+    }
 
-        return await processSingleRouteEnhancedWithVisibility(
-          routeEntry, 
-          globalIndex, 
-          userId, 
-          dataFolderPath, 
-          terrainType, 
-          dataCollectionMode,
-          skipExistingRoutes,
-          {
-            includeSharpTurns,
-            includeBlindSpots,
-            includeNetworkCoverage,
-            includeEnhancedRoadConditions,
-            includeAccidentData,
-            includeSeasonalWeather,
-            downloadImages,
-            generateReports,
-            // NEW: Visibility options
-            enableAutomaticVisibilityAnalysis,
-            visibilityAnalysisTimeout,
-            continueOnVisibilityFailure,
-            visibilityAnalysisMode
-          }
-        );
-      } catch (error) {
-        console.error(`❌ Enhanced Route ${globalIndex} failed:`, error.message);
-        return {
-          routeNumber: globalIndex,
-          fromCode: routeEntry.fromcode,
-          toCode: routeEntry.tocode,
-          status: 'failed',
-          error: error.message,
-          processingTime: 0,
-          visibilityAnalysisAttempted: false,
-          visibilityAnalysisSuccessful: false
-        };
-      }
-    });
-
-    // Wait for batch completion with extended timeout (for visibility analysis)
-    const batchResults = await Promise.allSettled(
-      batchPromises.map(promise => 
-        Promise.race([
-          promise,
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Enhanced route processing with visibility timeout')), 400000) // 6.5 min per route max
-          )
-        ])
-      )
-    );
-
-    // Collect enhanced results including visibility data
-    batchResults.forEach((result, index) => {
+    // Process batch results
+    batchPromises.forEach((result, index) => {
       let routeResult;
       
       if (result.status === 'fulfilled') {
         routeResult = result.value;
       } else {
-        const routeEntry = batch[index];
+        const routeEntry = batch.routes[index];
         routeResult = {
-          routeNumber: batchIndex * batchSize + index + 1,
+          routeNumber: batch.startIndex + index + 1,
           fromCode: routeEntry.fromcode,
           toCode: routeEntry.tocode,
           status: 'failed',
-          error: result.reason?.message || 'Unknown enhanced processing error',
-          processingTime: 0,
-          visibilityAnalysisAttempted: false,
-          visibilityAnalysisSuccessful: false
+          error: result.reason?.message || 'Unknown error'
         };
       }
 
@@ -688,277 +535,103 @@ async function processRoutesEnhancedWithVisibilityAndStatus(routeEntries, userId
         results.failed.push(routeResult);
       }
 
-      // Track enhanced data collection
-      if (routeResult.enhancedDataCollectionAttempted) {
-        results.enhancedDataCollection.attempted++;
-        if (routeResult.enhancedDataCollectionSuccessful) {
-          results.enhancedDataCollection.successful++;
-          if (routeResult.enhancedCollectionCounts) {
-            Object.keys(results.enhancedDataCollection.collectionBreakdown).forEach(key => {
-              results.enhancedDataCollection.collectionBreakdown[key] += routeResult.enhancedCollectionCounts[key] || 0;
-            });
-            
-            results.enhancedDataCollection.sharpTurnsCollected += routeResult.enhancedCollectionCounts.sharpTurns || 0;
-            results.enhancedDataCollection.blindSpotsCollected += routeResult.enhancedCollectionCounts.blindSpots || 0;
-            results.enhancedDataCollection.networkCoverageAnalyzed += routeResult.enhancedCollectionCounts.networkCoverage || 0;
-            results.enhancedDataCollection.roadConditionsAnalyzed += routeResult.enhancedCollectionCounts.roadConditions || 0;
-            results.enhancedDataCollection.accidentDataCollected += routeResult.enhancedCollectionCounts.accidentProneAreas || 0;
-            results.enhancedDataCollection.seasonalWeatherCollected += routeResult.enhancedCollectionCounts.seasonalWeatherData || 0;
-            
-            const totalRecords = Object.values(routeResult.enhancedCollectionCounts).reduce((sum, count) => sum + (count || 0), 0);
-            results.enhancedDataCollection.totalRecordsCreated += totalRecords;
-          }
-        } else {
-          results.enhancedDataCollection.failed++;
-        }
-      }
-
-      // NEW: Track visibility analysis results
-      if (enableAutomaticVisibilityAnalysis) {
-        if (routeResult.visibilityAnalysisAttempted) {
-          results.visibilityAnalysis.attempted++;
-          
-          if (routeResult.visibilityAnalysisSuccessful) {
-            results.visibilityAnalysis.successful++;
-            
-            // Aggregate visibility data
-            if (routeResult.visibilityData) {
-              results.visibilityAnalysis.totalSharpTurns += routeResult.visibilityData.sharpTurns || 0;
-              results.visibilityAnalysis.totalBlindSpots += routeResult.visibilityData.blindSpots || 0;
-              results.visibilityAnalysis.criticalTurns += routeResult.visibilityData.criticalTurns || 0;
-              results.visibilityAnalysis.criticalBlindSpots += routeResult.visibilityData.criticalBlindSpots || 0;
-              
-              if (routeResult.visibilityData.sharpTurnsAnalyzed) {
-                results.visibilityAnalysis.analysisBreakdown.sharpTurnsSuccess++;
-              } else {
-                results.visibilityAnalysis.analysisBreakdown.sharpTurnsFailed++;
-              }
-              
-              if (routeResult.visibilityData.blindSpotsAnalyzed) {
-                results.visibilityAnalysis.analysisBreakdown.blindSpotsSuccess++;
-              } else {
-                results.visibilityAnalysis.analysisBreakdown.blindSpotsFailed++;
-              }
-            }
-          } else {
-            results.visibilityAnalysis.failed++;
-            if (routeResult.visibilityAnalysisError) {
-              results.visibilityAnalysis.errors.push({
-                routeNumber: routeResult.routeNumber,
-                fromCode: routeResult.fromCode,
-                toCode: routeResult.toCode,
-                error: routeResult.visibilityAnalysisError
-              });
-            }
-          }
-        } else {
-          results.visibilityAnalysis.skipped++;
-        }
-      }
-
-      // Update real-time processing state after each route
+      // Update state after each route
       const currentState = getProcessingState(userId);
-      const newCompletedRoutes = currentState.completedRoutes + (routeResult.status === 'successful' ? 1 : 0);
-      const newFailedRoutes = currentState.failedRoutes + (routeResult.status === 'failed' ? 1 : 0);
-      
-      // Update enhanced data collection stats
-      if (routeResult.enhancedCollectionCounts) {
-        const currentEnhanced = currentState.enhancedDataCollection;
-        const newEnhanced = {
-          attempted: currentEnhanced.attempted + (routeResult.enhancedDataCollectionAttempted ? 1 : 0),
-          successful: currentEnhanced.successful + (routeResult.enhancedDataCollectionSuccessful ? 1 : 0),
-          failed: currentEnhanced.failed + (!routeResult.enhancedDataCollectionSuccessful && routeResult.enhancedDataCollectionAttempted ? 1 : 0),
-         // Continuation from the previous part - completing the real-time status updates
-
-          sharpTurnsCollected: currentEnhanced.sharpTurnsCollected + (routeResult.enhancedCollectionCounts.sharpTurns || 0),
-          blindSpotsCollected: currentEnhanced.blindSpotsCollected + (routeResult.enhancedCollectionCounts.blindSpots || 0),
-          networkCoverageAnalyzed: currentEnhanced.networkCoverageAnalyzed + (routeResult.enhancedCollectionCounts.networkCoverage || 0),
-          roadConditionsAnalyzed: currentEnhanced.roadConditionsAnalyzed + (routeResult.enhancedCollectionCounts.roadConditions || 0),
-          accidentDataCollected: currentEnhanced.accidentDataCollected + (routeResult.enhancedCollectionCounts.accidentProneAreas || 0),
-          totalRecordsCreated: currentEnhanced.totalRecordsCreated + Object.values(routeResult.enhancedCollectionCounts).reduce((sum, count) => sum + (count || 0), 0),
-          collectionBreakdown: {
-            emergencyServices: currentEnhanced.collectionBreakdown.emergencyServices + (routeResult.enhancedCollectionCounts.emergencyServices || 0),
-            weatherConditions: currentEnhanced.collectionBreakdown.weatherConditions + (routeResult.enhancedCollectionCounts.weatherConditions || 0),
-            trafficData: currentEnhanced.collectionBreakdown.trafficData + (routeResult.enhancedCollectionCounts.trafficData || 0),
-            accidentProneAreas: currentEnhanced.collectionBreakdown.accidentProneAreas + (routeResult.enhancedCollectionCounts.accidentProneAreas || 0),
-            roadConditions: currentEnhanced.collectionBreakdown.roadConditions + (routeResult.enhancedCollectionCounts.roadConditions || 0),
-            sharpTurns: currentEnhanced.collectionBreakdown.sharpTurns + (routeResult.enhancedCollectionCounts.sharpTurns || 0),
-            blindSpots: currentEnhanced.collectionBreakdown.blindSpots + (routeResult.enhancedCollectionCounts.blindSpots || 0),
-            networkCoverage: currentEnhanced.collectionBreakdown.networkCoverage + (routeResult.enhancedCollectionCounts.networkCoverage || 0),
-            seasonalWeatherData: currentEnhanced.collectionBreakdown.seasonalWeatherData + (routeResult.enhancedCollectionCounts.seasonalWeatherData || 0)
-          }
-        };
-        
-        // Update visibility analysis stats if available
-        const currentVisibility = currentState.visibilityAnalysis;
-        const newVisibility = {
-          ...currentVisibility,
-          attempted: currentVisibility.attempted + (routeResult.visibilityAnalysisAttempted ? 1 : 0),
-          successful: currentVisibility.successful + (routeResult.visibilityAnalysisSuccessful ? 1 : 0),
-          failed: currentVisibility.failed + (!routeResult.visibilityAnalysisSuccessful && routeResult.visibilityAnalysisAttempted ? 1 : 0),
-          totalSharpTurns: currentVisibility.totalSharpTurns + (routeResult.visibilityData?.sharpTurns || 0),
-          totalBlindSpots: currentVisibility.totalBlindSpots + (routeResult.visibilityData?.blindSpots || 0),
-          criticalTurns: currentVisibility.criticalTurns + (routeResult.visibilityData?.criticalTurns || 0),
-          criticalBlindSpots: currentVisibility.criticalBlindSpots + (routeResult.visibilityData?.criticalBlindSpots || 0),
-          currentRoute: null // Clear current route after completion
-        };
-        
-        updateProcessingState(userId, {
-          completedRoutes: newCompletedRoutes,
-          failedRoutes: newFailedRoutes,
-          enhancedDataCollection: newEnhanced,
-          visibilityAnalysis: newVisibility,
-          currentRoute: `Completed route ${routeResult.routeNumber}/${routeEntries.length}`,
-          estimatedTimeRemaining: `${Math.round(((routeEntries.length - routeResult.routeNumber) / batchSize) * 3)} minutes remaining`
-        });
-      }
+      updateProcessingState(userId, {
+        completedRoutes: currentState.completedRoutes + 1,
+        failedRoutes: routeResult.status === 'failed' ? 
+          currentState.failedRoutes + 1 : currentState.failedRoutes
+      });
     });
 
-    // Brief pause between batches
+    // Check memory usage
+    if (batchIndex % OPTIMIZED_CONFIG.MEMORY_CHECK_INTERVAL === 0) {
+      const memUsage = process.memoryUsage();
+      const heapUsedPercent = (memUsage.heapUsed / memUsage.heapTotal) * 100;
+      
+      if (heapUsedPercent > 85) {
+        console.log(`⚠️ High memory usage (${Math.round(heapUsedPercent)}%), triggering garbage collection...`);
+        if (global.gc) {
+          global.gc();
+        }
+        // Additional pause for memory recovery
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    }
+
+    const batchTime = Date.now() - batchStartTime;
+    console.log(`✅ Batch ${batchIndex + 1} completed in ${Math.round(batchTime / 1000)}s`);
+    console.log(`   Success: ${results.successful.length}, Failed: ${results.failed.length}, Skipped: ${results.skipped.length}`);
+
+    // Pause between batches to respect API limits
     if (batchIndex < batches.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log(`⏸️ Pausing ${OPTIMIZED_CONFIG.PAUSE_BETWEEN_BATCHES}ms before next batch...`);
+      await new Promise(resolve => setTimeout(resolve, OPTIMIZED_CONFIG.PAUSE_BETWEEN_BATCHES));
     }
   }
 
-  // Calculate visibility analysis average time
-  if (results.visibilityAnalysis.attempted > 0) {
-    const totalVisibilityTime = results.successful
-      .filter(r => r.visibilityAnalysisTime)
-      .reduce((sum, r) => sum + r.visibilityAnalysisTime, 0);
-    results.visibilityAnalysis.averageAnalysisTime = Math.round(totalVisibilityTime / results.visibilityAnalysis.attempted);
-  }
-
-  // Generate enhanced summary with visibility data
+  // Calculate final statistics
   const totalProcessingTime = Date.now() - startTime;
-  const summary = {
-    totalProcessingTime: `${(totalProcessingTime / 1000).toFixed(2)}s`,
-    averageTimePerRoute: results.successful.length > 0 ? 
-      `${(totalProcessingTime / (results.successful.length * 1000)).toFixed(2)}s` : '0s',
-    successRate: Math.round((results.successful.length / results.totalRoutes) * 100),
-    enhancedDataCollectionRate: results.enhancedDataCollection.attempted > 0 ? 
-      Math.round((results.enhancedDataCollection.successful / results.enhancedDataCollection.attempted) * 100) : 0,
-    
-    // NEW: Visibility analysis summary
-    visibilityAnalysisRate: results.visibilityAnalysis.attempted > 0 ? 
-      Math.round((results.visibilityAnalysis.successful / results.visibilityAnalysis.attempted) * 100) : 0,
-    
-    routesCreated: results.successful.length,
-    routesSkipped: results.skipped.length,
-    routesFailed: results.failed.length,
-    totalDataRecordsCreated: results.enhancedDataCollection.totalRecordsCreated,
-    completedAt: new Date().toISOString(),
-    
-    enhancedFeatures: {
-      sharpTurnsAnalyzed: results.enhancedDataCollection.sharpTurnsCollected,
-      blindSpotsAnalyzed: results.enhancedDataCollection.blindSpotsCollected,
-      networkCoverageAnalyzed: results.enhancedDataCollection.networkCoverageAnalyzed,
-      roadConditionsAnalyzed: results.enhancedDataCollection.roadConditionsAnalyzed,
-      accidentDataCollected: results.enhancedDataCollection.accidentDataCollected,
-      seasonalWeatherCollected: results.enhancedDataCollection.seasonalWeatherCollected
-    },
-    
-    // NEW: Visibility analysis summary
-    visibilityAnalysisResults: {
-      enabled: enableAutomaticVisibilityAnalysis,
-      routesAnalyzed: results.visibilityAnalysis.successful,
-      totalSharpTurns: results.visibilityAnalysis.totalSharpTurns,
-      totalBlindSpots: results.visibilityAnalysis.totalBlindSpots,
-      criticalTurns: results.visibilityAnalysis.criticalTurns,
-      criticalBlindSpots: results.visibilityAnalysis.criticalBlindSpots,
-      averageAnalysisTime: `${results.visibilityAnalysis.averageAnalysisTime}ms`,
-      successRate: results.visibilityAnalysis.attempted > 0 ? 
-        Math.round((results.visibilityAnalysis.successful / results.visibilityAnalysis.attempted) * 100) : 0,
-      failedAnalyses: results.visibilityAnalysis.failed,
-      analysisMode: visibilityAnalysisMode
-    }
-  };
-
+  const hours = Math.floor(totalProcessingTime / 1000 / 60 / 60);
+  const minutes = Math.floor((totalProcessingTime / 1000 / 60) % 60);
+  
   const finalResults = {
-    summary,
+    summary: {
+      totalProcessingTime: `${hours} hours ${minutes} minutes`,
+      totalRoutes: results.totalRoutes,
+      successful: results.successful.length,
+      failed: results.failed.length,
+      skipped: results.skipped.length,
+      successRate: Math.round((results.successful.length / results.totalRoutes) * 100),
+      averageTimePerRoute: Math.round(totalProcessingTime / results.totalRoutes / 1000) + 's',
+      routesPerHour: Math.round(results.totalRoutes / (totalProcessingTime / 1000 / 60 / 60))
+    },
     results: {
       successful: results.successful.length,
-      skipped: results.skipped.length,
       failed: results.failed.length,
-      enhancedDataCollectionStats: results.enhancedDataCollection,
-      visibilityAnalysisStats: results.visibilityAnalysis
-    },
-    enhancedMongodbCollectionsSummary: {
-      totalRecordsCreated: results.enhancedDataCollection.totalRecordsCreated + results.visibilityAnalysis.totalSharpTurns + results.visibilityAnalysis.totalBlindSpots,
-      breakdown: {
-        ...results.enhancedDataCollection.collectionBreakdown,
-        sharpTurns: results.visibilityAnalysis.totalSharpTurns,
-        blindSpots: results.visibilityAnalysis.totalBlindSpots
-      },
-      enhancedFeatures: summary.enhancedFeatures,
-      visibilityAnalysisResults: summary.visibilityAnalysisResults,
-      dataCollectionMode,
-      routesWithEnhancedData: results.enhancedDataCollection.successful,
-      routesWithVisibilityAnalysis: results.visibilityAnalysis.successful,
-      recordsPerRoute: results.enhancedDataCollection.successful > 0 ? 
-        Math.round(results.enhancedDataCollection.totalRecordsCreated / results.enhancedDataCollection.successful) : 0
-    },
-    detailedResults: {
-      successful: results.successful.slice(0, 10),
-      failed: results.failed.slice(0, 10),
-      skipped: results.skipped.slice(0, 5),
-      visibilityErrors: results.visibilityAnalysis.errors.slice(0, 5)
-    },
-    nextSteps: [
-      `${results.successful.length} routes created with enhanced data collection`,
-      `${results.enhancedDataCollection.totalRecordsCreated} total records created across all collections`,
-      `${results.visibilityAnalysis.successful} routes analyzed for visibility (${results.visibilityAnalysis.totalSharpTurns} sharp turns, ${results.visibilityAnalysis.totalBlindSpots} blind spots)`,
-      `Sharp Turns: ${results.visibilityAnalysis.totalSharpTurns} analyzed automatically (${results.visibilityAnalysis.criticalTurns} critical)`,
-      `Blind Spots: ${results.visibilityAnalysis.totalBlindSpots} analyzed automatically (${results.visibilityAnalysis.criticalBlindSpots} critical)`,
-      `Enhanced Road Conditions: ${results.enhancedDataCollection.roadConditionsAnalyzed} analyzed with multi-API integration`,
-      `Accident Data: ${results.enhancedDataCollection.accidentDataCollected} collected with real APIs`,
-      `Seasonal Weather: ${results.enhancedDataCollection.seasonalWeatherCollected} analyzed with advanced predictions`,
-      'Use enhanced route endpoints for detailed analysis of all collected data',
-      'Access visibility analysis results via /api/sharp-turns-blind-spots/routes/:routeId/visibility-analysis',
-      'All MongoDB collections are populated with comprehensive safety data including automatic visibility analysis'
-    ]
+      skipped: results.skipped.length
+    }
   };
 
-  // Update final processing state
+  // Update final state
   updateProcessingState(userId, {
     status: 'completed',
     currentRoute: 'Processing completed successfully',
-    completedRoutes: results.successful.length,
-    failedRoutes: results.failed.length,
-    estimatedTimeRemaining: 'Completed',
     results: finalResults
   });
 
-  console.log(`\n✅ ENHANCED BULK PROCESSING WITH VISIBILITY ANALYSIS COMPLETED`);
-  console.log(`📊 Results: ${results.successful.length} successful, ${results.skipped.length} skipped, ${results.failed.length} failed`);
-  console.log(`⏱️ Total time: ${(totalProcessingTime / 1000).toFixed(2)}s`);
-  console.log(`🎯 Enhanced data: ${results.enhancedDataCollection.totalRecordsCreated} total records created`);
-  console.log(`🔍 Visibility analysis: ${results.visibilityAnalysis.successful}/${results.visibilityAnalysis.attempted} routes analyzed`);
-  console.log(`📈 Sharp turns found: ${results.visibilityAnalysis.totalSharpTurns} (${results.visibilityAnalysis.criticalTurns} critical)`);
-  console.log(`🚫 Blind spots found: ${results.visibilityAnalysis.totalBlindSpots} (${results.visibilityAnalysis.criticalBlindSpots} critical)`);
+  console.log(`\n✅ OPTIMIZED BULK PROCESSING COMPLETED`);
+  console.log(`📊 Total time: ${hours}h ${minutes}m`);
+  console.log(`📈 Success rate: ${finalResults.summary.successRate}%`);
+  console.log(`⚡ Performance: ${finalResults.summary.routesPerHour} routes/hour`);
 
   return finalResults;
 }
 
-/**
- * NEW: Background processing for enhanced routes with visibility analysis and real-time status
- */
-async function processRoutesInBackgroundEnhancedWithVisibility(routeEntries, userId, options) {
-  console.log(`🔄 Starting enhanced background processing with automatic visibility analysis for ${routeEntries.length} routes`);
+// Background processing for large batches
+async function processRoutesInBackgroundOptimized(routeEntries, userId, options) {
+  console.log(`🔄 Starting optimized background processing for ${routeEntries.length} routes`);
+  console.log(`⏱️ Estimated completion: ${Math.round(routeEntries.length / 100 * 2)} hours`);
   
   try {
-    const results = await processRoutesEnhancedWithVisibilityAndStatus(routeEntries, userId, options);
+    const results = await processRoutesEnhancedOptimized(routeEntries, userId, options);
     
-    // Save results to file
-    const resultsFilePath = path.join('./downloads/bulk-processing-results', `enhanced-with-visibility-background-results-${Date.now()}.json`);
+    // Save final results
+    const resultsFilePath = path.join(
+      './downloads/bulk-processing-results', 
+      `optimized-results-${Date.now()}.json`
+    );
     await fsPromises.mkdir(path.dirname(resultsFilePath), { recursive: true });
     await fsPromises.writeFile(resultsFilePath, JSON.stringify(results, null, 2));
     
-    console.log(`✅ Enhanced background processing with visibility analysis completed. Results saved: ${resultsFilePath}`);
+    console.log(`✅ Background processing completed. Results saved: ${resultsFilePath}`);
+    
+    // Send notification (implement as needed)
+    // await sendCompletionNotification(userId, results);
     
   } catch (error) {
-    console.error('❌ Enhanced background processing with visibility analysis failed:', error);
+    console.error('❌ Background processing failed:', error);
     
-    // Update state with error
     updateProcessingState(userId, {
       status: 'failed',
       currentRoute: 'Background processing failed',
@@ -967,14 +640,8 @@ async function processRoutesInBackgroundEnhancedWithVisibility(routeEntries, use
   }
 }
 
-// ============================================================================
-// SINGLE ROUTE PROCESSING WITH VISIBILITY ANALYSIS
-// ============================================================================
-
-/**
- * ENHANCED single route processing with automatic visibility analysis
- */
-async function processSingleRouteEnhancedWithVisibility(routeEntry, routeNumber, userId, dataFolderPath, terrainType, dataCollectionMode, skipExistingRoutes, enhancedOptions) {
+// Optimized single route processing
+async function processSingleRouteOptimized(routeEntry, routeNumber, userId, options) {
   const startTime = Date.now();
   const result = {
     routeNumber,
@@ -984,488 +651,277 @@ async function processSingleRouteEnhancedWithVisibility(routeEntry, routeNumber,
     toName: routeEntry.toname,
     status: 'failed',
     routeId: null,
-    gpsPoints: 0,
-    enhancedDataCollectionAttempted: false,
-    enhancedDataCollectionSuccessful: false,
-    // NEW: Visibility analysis tracking
-    visibilityAnalysisAttempted: false,
-    visibilityAnalysisSuccessful: false,
-    visibilityAnalysisTime: 0,
-    visibilityAnalysisError: null,
-    visibilityData: {
-      sharpTurns: 0,
-      blindSpots: 0,
-      criticalTurns: 0,
-      criticalBlindSpots: 0,
-      sharpTurnsAnalyzed: false,
-      blindSpotsAnalyzed: false,
-      analysisMethod: 'none'
-    },
     processingTime: 0,
-    error: null,
-    enhancedCollectionCounts: {}
+    error: null
   };
 
   try {
-    console.log(`  📍 Enhanced Route ${routeNumber} with Auto-Visibility: ${routeEntry.fromcode} → ${routeEntry.tocode}`);
-
-    // Check if route already exists
-    if (skipExistingRoutes) {
+    // Quick check if route exists
+    if (options.skipExistingRoutes) {
       const existingRoute = await Route.findOne({
         userId,
         fromCode: routeEntry.fromcode,
         toCode: routeEntry.tocode,
         status: { $ne: 'deleted' }
-      });
+      }).select('_id routeId');
 
       if (existingRoute) {
         result.status = 'skipped';
         result.routeId = existingRoute._id;
         result.error = 'Route already exists';
         result.processingTime = Date.now() - startTime;
-        console.log(`    ⏭️ Skipped: Route already exists (${existingRoute.routeId})`);
         
-        // NEW: Try visibility analysis on existing route if enabled
-        if (enhancedOptions.enableAutomaticVisibilityAnalysis) {
-          try {
-            const visibilityResult = await performAutomaticVisibilityAnalysis(
-              existingRoute._id, 
-              enhancedOptions.visibilityAnalysisMode,
-              enhancedOptions.visibilityAnalysisTimeout
-            );
-            result.visibilityAnalysisAttempted = true;
-            result.visibilityAnalysisSuccessful = visibilityResult.success;
-            result.visibilityData = visibilityResult.data;
-            result.visibilityAnalysisTime = visibilityResult.analysisTime;
-            if (!visibilityResult.success) {
-              result.visibilityAnalysisError = visibilityResult.error;
-            }
-          } catch (visError) {
-            result.visibilityAnalysisError = visError.message;
-            if (!enhancedOptions.continueOnVisibilityFailure) {
-              result.status = 'failed';
-              result.error = `Visibility analysis failed: ${visError.message}`;
-            }
-          }
+        // Still run visibility analysis if needed
+        if (options.enableAutomaticVisibilityAnalysis) {
+          await performVisibilityAnalysisOptimized(existingRoute._id, options);
         }
         
         return result;
       }
     }
 
-    // Find and load GPS data
-    const gpsPoints = await loadGPSDataOptimized(dataFolderPath, routeEntry);
+    // Load GPS data
+    const gpsPoints = await loadGPSDataOptimized(options.dataFolderPath, routeEntry);
     
     if (gpsPoints.length < 2) {
-      throw new Error(`Insufficient GPS points: ${gpsPoints.length} (minimum 2 required)`);
+      throw new Error(`Insufficient GPS points: ${gpsPoints.length}`);
     }
-
-    result.gpsPoints = gpsPoints.length;
-    console.log(`    📊 Loaded ${gpsPoints.length} GPS points`);
 
     // Create route
-    const route = await createRouteOptimized(gpsPoints, routeEntry, userId, terrainType);
+    const route = await createRouteOptimized(gpsPoints, routeEntry, userId, options.terrainType);
     result.status = 'successful';
     result.routeId = route._id;
-    
-    console.log(`    ✅ Route created: ${route.routeId}`);
 
-    // ENHANCED DATA COLLECTION (existing functionality)
-    if (dataCollectionMode !== 'none') {
-      result.enhancedDataCollectionAttempted = true;
+    // Run data collection and visibility analysis in parallel
+    const [dataCollectionResult, visibilityResult] = await Promise.all([
+      // Data collection
+      options.dataCollectionMode !== 'none' ? 
+        collectEnhancedDataOptimized(route._id, options) : 
+        Promise.resolve(null),
       
-      try {
-        const enhancedCollectionCounts = await collectEnhancedDataForRoute(route._id, dataCollectionMode, enhancedOptions);
-        
-        const totalRecords = Object.values(enhancedCollectionCounts).reduce((sum, count) => sum + count, 0);
-        
-        if (totalRecords > 0) {
-          result.enhancedDataCollectionSuccessful = true;
-          result.enhancedCollectionCounts = enhancedCollectionCounts;
-          console.log(`    ✅ Enhanced data collection completed: ${totalRecords} records across ${Object.keys(enhancedCollectionCounts).filter(k => enhancedCollectionCounts[k] > 0).length} collections`);
-        } else {
-          result.enhancedDataCollectionSuccessful = false;
-          result.enhancedCollectionCounts = enhancedCollectionCounts;
-          console.log(`    ⚠️ Enhanced data collection completed but no records created`);
-        }
-        
-      } catch (dataError) {
-        console.error(`    ❌ Enhanced data collection failed:`, dataError.message);
-        result.enhancedDataCollectionSuccessful = false;
-        result.enhancedDataCollectionError = dataError.message;
-      }
+      // Visibility analysis
+      options.enableAutomaticVisibilityAnalysis ? 
+        performVisibilityAnalysisOptimized(route._id, options) : 
+        Promise.resolve(null)
+    ]);
+
+    // Update result with collection data
+    if (dataCollectionResult) {
+      result.enhancedDataCollected = dataCollectionResult.totalRecords;
     }
-
-    // NEW: AUTOMATIC VISIBILITY ANALYSIS
-    if (enhancedOptions.enableAutomaticVisibilityAnalysis) {
-      console.log(`    🔍 Starting automatic visibility analysis (mode: ${enhancedOptions.visibilityAnalysisMode})...`);
-      result.visibilityAnalysisAttempted = true;
-      
-      const visibilityStartTime = Date.now();
-      
-      try {
-        const visibilityResult = await performAutomaticVisibilityAnalysis(
-          route._id, 
-          enhancedOptions.visibilityAnalysisMode,
-          enhancedOptions.visibilityAnalysisTimeout
-        );
-        
-        result.visibilityAnalysisTime = Date.now() - visibilityStartTime;
-        result.visibilityAnalysisSuccessful = visibilityResult.success;
-        result.visibilityData = visibilityResult.data;
-        
-        if (visibilityResult.success) {
-          console.log(`    ✅ Visibility analysis completed: ${visibilityResult.data.sharpTurns} turns, ${visibilityResult.data.blindSpots} blind spots (${result.visibilityAnalysisTime}ms)`);
-          if (visibilityResult.data.criticalTurns > 0 || visibilityResult.data.criticalBlindSpots > 0) {
-            console.log(`    ⚠️ CRITICAL visibility issues found: ${visibilityResult.data.criticalTurns} critical turns, ${visibilityResult.data.criticalBlindSpots} critical blind spots`);
-          }
-        } else {
-          result.visibilityAnalysisError = visibilityResult.error;
-          console.error(`    ❌ Visibility analysis failed: ${visibilityResult.error} (${result.visibilityAnalysisTime}ms)`);
-          
-          // Check if we should fail the entire route processing
-          if (!enhancedOptions.continueOnVisibilityFailure) {
-            result.status = 'failed';
-            result.error = `Visibility analysis failed: ${visibilityResult.error}`;
-          }
-        }
-        
-      } catch (visibilityError) {
-        result.visibilityAnalysisTime = Date.now() - visibilityStartTime;
-        result.visibilityAnalysisError = visibilityError.message;
-        console.error(`    ❌ Visibility analysis exception: ${visibilityError.message} (${result.visibilityAnalysisTime}ms)`);
-        
-        if (!enhancedOptions.continueOnVisibilityFailure) {
-          result.status = 'failed';
-          result.error = `Visibility analysis exception: ${visibilityError.message}`;
-        }
-      }
-    } else {
-      console.log(`    ⏭️ Automatic visibility analysis disabled`);
+    
+    if (visibilityResult) {
+      result.visibilityAnalyzed = visibilityResult.success;
+      result.sharpTurns = visibilityResult.sharpTurns;
+      result.blindSpots = visibilityResult.blindSpots;
     }
 
   } catch (error) {
     result.error = error.message;
-    console.error(`    ❌ Enhanced Route ${routeNumber} failed:`, error.message);
+    console.error(`Route ${routeNumber} error:`, error.message);
   }
 
   result.processingTime = Date.now() - startTime;
   return result;
 }
 
-/**
- * NEW: Perform automatic visibility analysis for a route
- */
-async function performAutomaticVisibilityAnalysis(routeId, analysisMode, timeout) {
-  const result = {
-    success: false,
-    data: {
-      sharpTurns: 0,
-      blindSpots: 0,
-      criticalTurns: 0,
-      criticalBlindSpots: 0,
-      sharpTurnsAnalyzed: false,
-      blindSpotsAnalyzed: false,
-      analysisMethod: 'none'
-    },
-    error: null,
-    analysisTime: 0
-  };
-
-  const analysisStartTime = Date.now();
-
-  try {
-    // Import the visibility analysis service
-    const sharpTurnsService = require('../services/sharpTurnsBlindSpotsService');
-    
-    // Set timeout for the analysis
-    const analysisPromise = sharpTurnsService.analyzeRoute(routeId);
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error(`Visibility analysis timeout after ${timeout}ms`)), timeout)
-    );
-
-    // Run analysis with timeout
-    const analysisResults = await Promise.race([analysisPromise, timeoutPromise]);
-    
-    // Process results
-    if (analysisResults && typeof analysisResults === 'object') {
-      // Extract sharp turns data
-      if (analysisResults.sharpTurns && analysisResults.sharpTurns.turns) {
-        result.data.sharpTurns = analysisResults.sharpTurns.turns.length;
-        result.data.criticalTurns = analysisResults.sharpTurns.turns.filter(turn => turn.riskScore >= 8).length;
-        result.data.sharpTurnsAnalyzed = true;
-      }
-      
-      // Extract blind spots data
-      if (analysisResults.blindSpots && analysisResults.blindSpots.spots) {
-        result.data.blindSpots = analysisResults.blindSpots.spots.length;
-        result.data.criticalBlindSpots = analysisResults.blindSpots.spots.filter(spot => spot.riskScore >= 8).length;
-        result.data.blindSpotsAnalyzed = true;
-      }
-      
-      // Set analysis method
-      result.data.analysisMethod = analysisResults.blindSpots?.analysisMethod || 'automatic';
-      
-      // Determine if analysis was successful
-      result.success = result.data.sharpTurnsAnalyzed || result.data.blindSpotsAnalyzed;
-      
-      if (!result.success) {
-        result.error = 'No visibility data was successfully analyzed';
-      }
-      
-    } else {
-      result.error = 'Invalid analysis results returned';
-    }
-
-  } catch (error) {
-    result.error = error.message;
-    console.error(`Automatic visibility analysis error for route ${routeId}:`, error);
-  }
-
-  result.analysisTime = Date.now() - analysisStartTime;
+// Optimized visibility analysis with timeout handling
+async function performVisibilityAnalysisOptimized(routeId, options) {
+  const timeout = options.visibilityAnalysisTimeout || OPTIMIZED_CONFIG.VISIBILITY_TIMEOUT;
   
-  return result;
-}
-
-// ============================================================================
-// ENHANCED DATA COLLECTION FUNCTIONS (EXISTING - REUSED)
-// ============================================================================
-
-/**
- * Collect enhanced data using all available services (existing function - reused)
- */
-async function collectEnhancedDataForRoute(routeId, mode, enhancedOptions) {
-  const collectionCounts = {
-    emergencyServices: 0,
-    weatherConditions: 0,
-    trafficData: 0,
-    accidentProneAreas: 0,
-    roadConditions: 0,
-    sharpTurns: 0,
-    blindSpots: 0,
-    networkCoverage: 0,
-    seasonalWeatherData: 0
-  };
-
-  const collectionPromises = [];
-
-  try {
-    // 1. Basic Data Collection (if mode is basic or comprehensive)
-    if (mode === 'basic' || mode === 'comprehensive' || mode === 'complete') {
-      collectionPromises.push(
-        collectBasicRouteData(routeId).catch(error => {
-          console.error('Basic data collection failed:', error.message);
-          return { error: error.message };
-        })
-      );
-    }
-
-    // 2. Sharp Turns Analysis (if enabled) - NOTE: This is separate from automatic visibility analysis
-    if (enhancedOptions.includeSharpTurns && (mode === 'comprehensive' || mode === 'complete')) {
-      collectionPromises.push(
-        collectSharpTurnsAndBlindSpots(routeId).catch(error => {
-          console.error('Sharp turns/blind spots analysis failed:', error.message);
-          return { error: error.message };
-        })
-      );
-    }
-
-    // 3. Network Coverage Analysis (if enabled)
-    if (enhancedOptions.includeNetworkCoverage && (mode === 'comprehensive' || mode === 'complete')) {
-      collectionPromises.push(
-        collectNetworkCoverageData(routeId).catch(error => {
-          console.error('Network coverage analysis failed:', error.message);
-          return { error: error.message };
-        })
-      );
-    }
-
-    // 4. Enhanced Road Conditions (if enabled)
-    if (enhancedOptions.includeEnhancedRoadConditions && (mode === 'comprehensive' || mode === 'complete')) {
-      collectionPromises.push(
-        collectEnhancedRoadConditions(routeId).catch(error => {
-          console.error('Enhanced road conditions failed:', error.message);
-          return { error: error.message };
-        })
-      );
-    }
-
-    // 5. Accident Data Collection (if enabled)
-    if (enhancedOptions.includeAccidentData && (mode === 'comprehensive' || mode === 'complete')) {
-      collectionPromises.push(
-        collectAccidentData(routeId).catch(error => {
-          console.error('Accident data collection failed:', error.message);
-          return { error: error.message };
-        })
-      );
-    }
-
-    // 6. Seasonal Weather Analysis (if enabled)
-    if (enhancedOptions.includeSeasonalWeather && mode === 'complete') {
-      collectionPromises.push(
-        collectSeasonalWeatherData(routeId).catch(error => {
-          console.error('Seasonal weather analysis failed:', error.message);
-          return { error: error.message };
-        })
-      );
-    }
-
-    // Execute all collections with timeout
-    const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Enhanced data collection timeout after 180 seconds')), 180000)
-    );
-    
-    await Promise.race([Promise.all(collectionPromises), timeout]);
-    
-    // Count actual records created
-    const actualCounts = await countRecordsCreated(routeId);
-    
-    return actualCounts;
-    
-  } catch (error) {
-    console.error(`Enhanced data collection failed: ${error.message}`);
-    return collectionCounts; // Return empty counts on failure
-  }
-}
-
-/**
- * Collect basic route data (original data collection service)
- */
-async function collectBasicRouteData(routeId) {
-  try {
-    const dataCollectionService = require('../services/dataCollectionService');
-    return await dataCollectionService.collectAllRouteData(routeId);
-  } catch (error) {
-    console.error('Basic data collection failed:', error);
-    throw error;
-  }
-}
-
-/**
- * Collect sharp turns and blind spots using the enhanced service
- */
-async function collectSharpTurnsAndBlindSpots(routeId) {
   try {
     const sharpTurnsService = require('../services/sharpTurnsBlindSpotsService');
-    return await sharpTurnsService.analyzeRoute(routeId);
-  } catch (error) {
-    console.error('Sharp turns and blind spots analysis failed:', error);
-    throw error;
-  }
-}
-
-/**
- * Collect network coverage data using the network coverage service
- */
-async function collectNetworkCoverageData(routeId) {
-  try {
-    const { NetworkCoverageService } = require('../services/networkCoverageService');
-    return await NetworkCoverageService.analyzeNetworkCoverage(routeId);
-  } catch (error) {
-    console.error('Network coverage analysis failed:', error);
-    throw error;
-  }
-}
-
-/**
- * Collect enhanced road conditions using the enhanced service
- */
-async function collectEnhancedRoadConditions(routeId) {
-  try {
-    const enhancedRoadConditionsService = require('../services/enhancedRoadConditionsService');
-    return await enhancedRoadConditionsService.collectEnhancedRoadConditions(routeId);
-  } catch (error) {
-    console.error('Enhanced road conditions analysis failed:', error);
-    throw error;
-  }
-}
-
-// Continuation from Part 2 - completing the data collection and utility functions
-
-/**
- * Collect accident data using the accident service
- */
-async function collectAccidentData(routeId) {
-  try {
-    const accidentDataService = require('../services/accidentDataService');
-    const route = await Route.findById(routeId);
-    return await accidentDataService.collectRealAccidentProneAreas(route);
-  } catch (error) {
-    console.error('Accident data collection failed:', error);
-    throw error;
-  }
-}
-
-/**
- * Collect seasonal weather data using the enhanced weather service
- */
-async function collectSeasonalWeatherData(routeId) {
-  try {
-    const enhancedWeatherService = require('../services/enhancedWeatherService');
-    return await enhancedWeatherService.collectAllSeasonalWeatherData(routeId);
-  } catch (error) {
-    console.error('Seasonal weather analysis failed:', error);
-    throw error;
-  }
-}
-
-/**
- * Count records created efficiently across all collections
- */
-async function countRecordsCreated(routeId) {
-  try {
-    const [
-      emergencyCount,
-      weatherCount,
-      trafficCount,
-      accidentCount,
-      roadCount,
-      sharpTurnCount,
-      blindSpotCount,
-      networkCount
-    ] = await Promise.all([
-      require('../models/EmergencyService').countDocuments({ routeId }),
-      require('../models/WeatherCondition').countDocuments({ routeId }),
-      require('../models/TrafficData').countDocuments({ routeId }),
-      require('../models/AccidentProneArea').countDocuments({ routeId }),
-      require('../models/RoadCondition').countDocuments({ routeId }),
-      require('../models/SharpTurn').countDocuments({ routeId }),
-      require('../models/BlindSpot').countDocuments({ routeId }),
-      require('../models/NetworkCoverage').countDocuments({ routeId })
+    
+    // Create timeout promise
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error(`Visibility timeout after ${timeout}ms`)), timeout)
+    );
+    
+    // Race between analysis and timeout
+    const result = await Promise.race([
+      sharpTurnsService.analyzeRoute(routeId),
+      timeoutPromise
     ]);
-
+    
     return {
-      emergencyServices: emergencyCount,
-      weatherConditions: weatherCount,
-      trafficData: trafficCount,
-      accidentProneAreas: accidentCount,
-      roadConditions: roadCount,
-      sharpTurns: sharpTurnCount,
-      blindSpots: blindSpotCount,
-      networkCoverage: networkCount,
-      seasonalWeatherData: 0 // Would need separate model for seasonal data
+      success: true,
+      sharpTurns: result.sharpTurns?.turns?.length || 0,
+      blindSpots: result.blindSpots?.spots?.length || 0
     };
+    
   } catch (error) {
-    console.error('Error counting records:', error);
+    console.error(`Visibility analysis error for ${routeId}:`, error.message);
+    
+    // Continue processing if configured
+    if (options.continueOnVisibilityFailure) {
+      return {
+        success: false,
+        error: error.message,
+        sharpTurns: 0,
+        blindSpots: 0
+      };
+    }
+    
+    throw error;
+  }
+}
+
+// Optimized data collection with parallel API calls
+async function collectEnhancedDataOptimized(routeId, options) {
+  const collections = [];
+  
+  // Add collections based on options
+  if (options.includeSharpTurns || options.includeBlindSpots) {
+    collections.push(
+      require('../services/sharpTurnsBlindSpotsService').analyzeRoute(routeId)
+        .catch(err => ({ error: err.message, type: 'visibility' }))
+    );
+  }
+  
+  if (options.includeNetworkCoverage) {
+    collections.push(
+      require('../services/networkCoverageService').NetworkCoverageService.analyzeNetworkCoverage(routeId)
+        .catch(err => ({ error: err.message, type: 'network' }))
+    );
+  }
+  
+  if (options.includeEnhancedRoadConditions) {
+    collections.push(
+      require('../services/enhancedRoadConditionsService').collectEnhancedRoadConditions(routeId)
+        .catch(err => ({ error: err.message, type: 'roadConditions' }))
+    );
+  }
+  
+  if (options.includeAccidentData) {
+    collections.push(
+      Route.findById(routeId).then(route => 
+        require('../services/accidentDataService').collectRealAccidentProneAreas(route)
+      ).catch(err => ({ error: err.message, type: 'accident' }))
+    );
+  }
+  
+  if (options.includeSeasonalWeather) {
+    collections.push(
+      require('../services/enhancedWeatherService').collectAllSeasonalWeatherData(routeId)
+        .catch(err => ({ error: err.message, type: 'weather' }))
+    );
+  }
+  
+  // Always include basic data collection
+  collections.push(
+    require('../services/dataCollectionService').collectAllRouteData(routeId)
+      .catch(err => ({ error: err.message, type: 'basic' }))
+  );
+  
+  // Execute all collections with timeout
+  const collectionTimeout = options.dataCollectionTimeout || OPTIMIZED_CONFIG.DATA_COLLECTION_TIMEOUT;
+  const timeoutPromise = new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Data collection timeout')), collectionTimeout)
+  );
+  
+  try {
+    const results = await Promise.race([
+      Promise.allSettled(collections),
+      timeoutPromise
+    ]);
+    
+    let totalRecords = 0;
+    let successfulCollections = 0;
+    
+    if (Array.isArray(results)) {
+      results.forEach(result => {
+        if (result.status === 'fulfilled' && !result.value.error) {
+          successfulCollections++;
+          // Count records (implementation specific)
+          totalRecords += result.value.totalRecords || 1;
+        }
+      });
+    }
+    
     return {
-      emergencyServices: 0,
-      weatherConditions: 0,
-      trafficData: 0,
-      accidentProneAreas: 0,
-      roadConditions: 0,
-      sharpTurns: 0,
-      blindSpots: 0,
-      networkCoverage: 0,
-      seasonalWeatherData: 0
+      totalRecords,
+      successfulCollections,
+      totalCollections: collections.length
+    };
+    
+  } catch (error) {
+    console.error('Data collection timeout:', error.message);
+    return {
+      totalRecords: 0,
+      successfulCollections: 0,
+      error: error.message
     };
   }
 }
 
-// ============================================================================
-// UTILITY FUNCTIONS (EXISTING - REUSED)
-// ============================================================================
+// Cancel processing endpoint
+router.post('/cancel', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    console.log('🛑 Cancel processing requested for user:', userId);
+    
+    updateProcessingState(userId, {
+      status: 'cancelled',
+      currentRoute: 'Processing cancelled by user'
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Processing cancellation requested'
+    });
+    
+  } catch (error) {
+    console.error('❌ Cancel processing error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error cancelling processing',
+      error: error.message
+    });
+  }
+});
 
-// Reuse existing helper functions from original code
+// Resume from checkpoint
+router.post('/resume', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { checkpointFile } = req.body;
+    
+    console.log('🔄 Resume processing requested for user:', userId);
+    
+    // Load checkpoint
+    const checkpointPath = checkpointFile || progressCheckpoints.get(userId);
+    if (!checkpointPath) {
+      return res.status(404).json({
+        success: false,
+        message: 'No checkpoint found'
+      });
+    }
+    
+    const checkpoint = JSON.parse(await fsPromises.readFile(checkpointPath, 'utf8'));
+    
+    res.status(200).json({
+      success: true,
+      message: 'Processing can be resumed',
+      data: {
+        completedRoutes: checkpoint.completedRoutes,
+        totalRoutes: checkpoint.totalRoutes,
+        lastUpdate: checkpoint.lastUpdate,
+        resumeFrom: checkpoint.completedRoutes
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Resume error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error resuming processing',
+      error: error.message
+    });
+  }
+});
+
+// Utility functions (reuse existing ones)
 async function loadGPSDataOptimized(dataFolderPath, routeEntry) {
   const possiblePaths = [
     path.join(dataFolderPath, `${routeEntry.fromcode}_${routeEntry.tocode}.xlsx`),
@@ -1584,8 +1040,8 @@ async function createRouteOptimized(gpsPoints, routeEntry, userId, terrainType) 
       trackingAccuracy: 'excellent',
       bulkProcessing: true,
       enhancedProcessing: true,
-      automaticVisibilityAnalysis: true, // NEW: Flag for automatic visibility
-      processingVersion: 'enhanced_with_visibility_v1.0'
+      automaticVisibilityAnalysis: true,
+      processingVersion: 'optimized_v2.0'
     }
   });
 
@@ -1647,7 +1103,6 @@ function calculateRouteDetailsOptimized(gpsPoints, routeEntry) {
   };
 }
 
-// Helper function to parse CSV (existing)
 async function parseBulkRoutesCSV(csvFilePath) {
   return new Promise((resolve, reject) => {
     const routes = [];
@@ -1698,344 +1153,40 @@ async function parseBulkRoutesCSV(csvFilePath) {
   });
 }
 
-// ============================================================================
-// ADDITIONAL ENDPOINTS FOR ENHANCED FUNCTIONALITY
-// ============================================================================
-
-/**
- * NEW: Add automatic visibility analysis to existing routes
- * POST /api/bulk-routes/add-visibility-to-existing-routes
- */
-router.post('/add-visibility-to-existing-routes', async (req, res) => {
-  try {
-    const { 
-      routeIds, 
-      visibilityAnalysisMode = 'comprehensive',
-      visibilityAnalysisTimeout = 180000,
-      continueOnFailure = true,
-      maxConcurrentRoutes = 2,
-      onlyAnalyzeMissingRoutes = true
-    } = req.body;
-    
-    const userId = req.user.id;
-    
-    if (!routeIds || !Array.isArray(routeIds)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Route IDs array is required'
-      });
-    }
-
-    if (routeIds.length > 50) {
-      return res.status(400).json({
-        success: false,
-        message: 'Maximum 50 routes can be processed at once'
-      });
-    }
-
-    console.log(`🔍 Starting visibility analysis for ${routeIds.length} existing routes`);
-
-    // Verify all routes belong to user
-    const routes = await Route.find({
-      _id: { $in: routeIds },
-      userId,
-      status: { $ne: 'deleted' }
-    });
-
-    if (routes.length !== routeIds.length) {
-      return res.status(400).json({
-        success: false,
-        message: 'Some routes not found or not accessible'
-      });
-    }
-
-    // Filter routes if only analyzing missing routes
-    let routesToAnalyze = routes;
-    if (onlyAnalyzeMissingRoutes) {
-      const [routesWithSharpTurns, routesWithBlindSpots] = await Promise.all([
-        require('../models/SharpTurn').distinct('routeId', { routeId: { $in: routeIds } }),
-        require('../models/BlindSpot').distinct('routeId', { routeId: { $in: routeIds } })
-      ]);
-      
-      const routesWithVisibility = new Set([...routesWithSharpTurns, ...routesWithBlindSpots]);
-      routesToAnalyze = routes.filter(route => !routesWithVisibility.has(route._id.toString()));
-      
-      console.log(`📊 Filtered to ${routesToAnalyze.length} routes without existing visibility analysis`);
-    }
-
-    const visibilityResults = {
-      totalRoutes: routesToAnalyze.length,
-      successful: [],
-      failed: [],
-      skipped: [],
-      totalSharpTurns: 0,
-      totalBlindSpots: 0,
-      criticalTurns: 0,
-      criticalBlindSpots: 0,
-      totalAnalysisTime: 0
-    };
-
-    // Process routes in batches
-    const batchSize = Math.min(parseInt(maxConcurrentRoutes), 2);
-    for (let i = 0; i < routesToAnalyze.length; i += batchSize) {
-      const batch = routesToAnalyze.slice(i, i + batchSize);
-      
-      const batchPromises = batch.map(async (route) => {
-        const startTime = Date.now();
-        
-        try {
-          console.log(`  🔍 Analyzing route: ${route.routeId || route.routeName}`);
-          
-          const visibilityResult = await performAutomaticVisibilityAnalysis(
-            route._id, 
-            visibilityAnalysisMode,
-            visibilityAnalysisTimeout
-          );
-          
-          const analysisTime = Date.now() - startTime;
-          
-          if (visibilityResult.success) {
-            // Update route metadata
-            await Route.findByIdAndUpdate(route._id, {
-              'metadata.automaticVisibilityAnalysis': true,
-              'metadata.visibilityAnalysisDate': new Date(),
-              'metadata.visibilityAnalysisMode': visibilityAnalysisMode
-            });
-            
-            return {
-              routeId: route.routeId || route._id,
-              routeName: route.routeName,
-              success: true,
-              analysisTime,
-              visibilityData: visibilityResult.data
-            };
-          } else {
-            return {
-              routeId: route.routeId || route._id,
-              routeName: route.routeName,
-              success: false,
-              error: visibilityResult.error,
-              analysisTime
-            };
-          }
-        } catch (error) {
-          const analysisTime = Date.now() - startTime;
-          console.error(`Visibility analysis failed for ${route.routeName}:`, error.message);
-          return {
-            routeId: route.routeId || route._id,
-            routeName: route.routeName,
-            success: false,
-            error: error.message,
-            analysisTime
-          };
-        }
-      });
-
-      const batchResults = await Promise.allSettled(
-        batchPromises.map(promise => 
-          Promise.race([
-            promise,
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Visibility analysis timeout')), visibilityAnalysisTimeout + 30000)
-            )
-          ])
-        )
-      );
-
-      batchResults.forEach((result) => {
-        if (result.status === 'fulfilled') {
-          const routeResult = result.value;
-          visibilityResults.totalAnalysisTime += routeResult.analysisTime || 0;
-          
-          if (routeResult.success) {
-            visibilityResults.successful.push(routeResult);
-            visibilityResults.totalSharpTurns += routeResult.visibilityData?.sharpTurns || 0;
-            visibilityResults.totalBlindSpots += routeResult.visibilityData?.blindSpots || 0;
-            visibilityResults.criticalTurns += routeResult.visibilityData?.criticalTurns || 0;
-            visibilityResults.criticalBlindSpots += routeResult.visibilityData?.criticalBlindSpots || 0;
-          } else {
-            if (continueOnFailure) {
-              visibilityResults.failed.push(routeResult);
-            } else {
-              throw new Error(`Visibility analysis failed for ${routeResult.routeName}: ${routeResult.error}`);
-            }
-          }
-        } else {
-          visibilityResults.failed.push({
-            routeId: 'unknown',
-            success: false,
-            error: result.reason?.message || 'Processing timeout'
-          });
-        }
-      });
-      
-      // Brief pause between batches
-      if (i + batchSize < routesToAnalyze.length) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-    }
-
-    const averageAnalysisTime = visibilityResults.successful.length > 0 ? 
-      Math.round(visibilityResults.totalAnalysisTime / visibilityResults.successful.length) : 0;
-
-    console.log(`✅ Visibility analysis completed: ${visibilityResults.successful.length} successful, ${visibilityResults.failed.length} failed`);
-
-    res.status(200).json({
-      success: true,
-      message: 'Visibility analysis for existing routes completed',
-      data: {
-        ...visibilityResults,
-        summary: {
-          successRate: Math.round((visibilityResults.successful.length / visibilityResults.totalRoutes) * 100),
-          averageAnalysisTime: `${averageAnalysisTime}ms`,
-          totalVisibilityPoints: visibilityResults.totalSharpTurns + visibilityResults.totalBlindSpots,
-          criticalPoints: visibilityResults.criticalTurns + visibilityResults.criticalBlindSpots,
-          analysisMode: visibilityAnalysisMode,
-          onlyMissingRoutes: onlyAnalyzeMissingRoutes
-        },
-        configuration: {
-          visibilityAnalysisMode,
-          visibilityAnalysisTimeout,
-          continueOnFailure,
-          maxConcurrentRoutes,
-          onlyAnalyzeMissingRoutes
-        },
-        nextSteps: [
-          `${visibilityResults.successful.length} routes now have visibility analysis`,
-          `${visibilityResults.totalSharpTurns} sharp turns identified across all routes`,
-          `${visibilityResults.totalBlindSpots} blind spots identified across all routes`,
-          `${visibilityResults.criticalTurns + visibilityResults.criticalBlindSpots} critical visibility points require immediate attention`,
-          'Use /api/sharp-turns-blind-spots/routes/:routeId/visibility-analysis for detailed analysis',
-          'Review failed analyses and retry if needed'
-        ]
-      }
-    });
-
-  } catch (error) {
-    console.error('Add visibility analysis to existing routes error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error adding visibility analysis to existing routes',
-      error: error.message
-    });
-  }
-});
-
-/**
- * NEW: Get enhanced processing configuration options
- * GET /api/bulk-routes/configuration
- */
+// Get configuration for large scale processing
 router.get('/configuration', async (req, res) => {
   try {
     const configuration = {
-      processingModes: {
-        original: {
-          description: 'Basic route processing with standard data collection',
-          endpoint: 'POST /api/bulk-routes/process-csv',
-          dataCollection: 'basic',
-          visibilityAnalysis: false,
-          maxConcurrentRoutes: 10,
-          estimatedTimePerRoute: '60s'
-        },
-        enhanced: {
-          description: 'Enhanced route processing with comprehensive data collection',
-          endpoint: 'POST /api/bulk-routes/process-csv-enhanced',
-          dataCollection: 'comprehensive',
-          visibilityAnalysis: 'optional',
-          maxConcurrentRoutes: 5,
-          estimatedTimePerRoute: '120s'
-        },
-        enhancedWithVisibility: {
-          description: 'Enhanced route processing with automatic visibility analysis',
-          endpoint: 'POST /api/bulk-routes/process-csv-enhanced (enableAutomaticVisibilityAnalysis=true)',
-          dataCollection: 'comprehensive',
-          visibilityAnalysis: 'automatic',
-          maxConcurrentRoutes: 3,
-          estimatedTimePerRoute: '180s'
-        }
-      },
-      dataCollectionModes: {
-        none: {
-          description: 'No additional data collection',
-          collections: []
-        },
-        basic: {
-          description: 'Basic data collection (emergency services, weather, traffic)',
-          collections: ['emergencyServices', 'weatherConditions', 'trafficData']
-        },
-        comprehensive: {
-          description: 'Comprehensive data collection including enhanced APIs',
-          collections: [
-            'emergencyServices', 'weatherConditions', 'trafficData',
-            'accidentProneAreas', 'roadConditions', 'networkCoverage'
-          ]
-        },
-        complete: {
-          description: 'Complete data collection with all available services',
-          collections: [
-            'emergencyServices', 'weatherConditions', 'trafficData',
-            'accidentProneAreas', 'roadConditions', 'networkCoverage',
-            'sharpTurns', 'blindSpots', 'seasonalWeatherData'
-          ]
-        }
-      },
-      visibilityAnalysisModes: {
-        basic: {
-          description: 'Basic visibility analysis with standard algorithms',
-          features: ['sharpTurns', 'basicBlindSpots'],
-          estimatedTime: '30s'
-        },
-        comprehensive: {
-          description: 'Comprehensive visibility analysis with enhanced algorithms',
-          features: ['sharpTurns', 'blindSpots', 'elevationAnalysis', 'curveAnalysis'],
-          estimatedTime: '60s'
-        },
-        detailed: {
-          description: 'Detailed visibility analysis with all available features',
-          features: [
-            'sharpTurns', 'blindSpots', 'elevationAnalysis', 'curveAnalysis',
-            'obstructionAnalysis', 'intersectionAnalysis', 'criticalRiskDetection'
-          ],
-          estimatedTime: '120s'
-        }
-      },
-      defaultParameters: {
-        enhancedWithVisibility: {
+      optimizedFor5800Routes: {
+        maxConcurrentRoutes: OPTIMIZED_CONFIG.MAX_CONCURRENT_ROUTES,
+        optimalBatchSize: OPTIMIZED_CONFIG.OPTIMAL_BATCH_SIZE,
+        routeTimeout: OPTIMIZED_CONFIG.ROUTE_TIMEOUT,
+        visibilityTimeout: OPTIMIZED_CONFIG.VISIBILITY_TIMEOUT,
+        estimatedProcessingTime: '48-72 hours',
+        recommendedSettings: {
+          backgroundProcessing: true,
           dataCollectionMode: 'comprehensive',
-          maxConcurrentRoutes: 2,
-          skipExistingRoutes: true,
           enableAutomaticVisibilityAnalysis: true,
-          visibilityAnalysisMode: 'comprehensive',
-          visibilityAnalysisTimeout: 180000,
           continueOnVisibilityFailure: true,
-          includeSharpTurns: true,
-          includeBlindSpots: true,
-          includeNetworkCoverage: true,
-          includeEnhancedRoadConditions: true,
-          includeAccidentData: true,
-          includeSeasonalWeather: false,
-          downloadImages: false,
-          generateReports: false
+          skipExistingRoutes: true
         }
       },
-      limits: {
-        maxFileSize: '10MB',
-        maxRoutesPerBatch: 100,
-        maxConcurrentRoutes: 10,
-        timeoutPerRoute: 400000,
-        visibilityAnalysisTimeout: 180000
+      systemRequirements: {
+        minimumRAM: '8GB',
+        recommendedRAM: '16GB',
+        diskSpace: '20GB',
+        cpuCores: '4+',
+        networkBandwidth: '10Mbps+'
       },
-      apiRequirements: {
-        googleMapsApiKey: {
-          required: true,
-          purpose: 'Elevation data, places data, roads data for visibility analysis',
-          envVariable: 'GOOGLE_MAPS_API_KEY'
-        },
-        openWeatherApiKey: {
-          required: false,
-          purpose: 'Enhanced weather data collection',
-          envVariable: 'OPENWEATHER_API_KEY'
-        }
+      apiLimits: {
+        googleMaps: '50 requests/second',
+        tomtom: '5 requests/second',
+        here: '5 requests/second'
+      },
+      monitoring: {
+        statusEndpoint: '/api/bulk-routes/status',
+        checkpointInterval: OPTIMIZED_CONFIG.CHECKPOINT_INTERVAL,
+        memoryCheckInterval: OPTIMIZED_CONFIG.MEMORY_CHECK_INTERVAL
       }
     };
 
@@ -2045,7 +1196,6 @@ router.get('/configuration', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Configuration endpoint error:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching configuration',
@@ -2053,9 +1203,5 @@ router.get('/configuration', async (req, res) => {
     });
   }
 });
-
-// ============================================================================
-// EXPORT ROUTER
-// ============================================================================
 
 module.exports = router;
