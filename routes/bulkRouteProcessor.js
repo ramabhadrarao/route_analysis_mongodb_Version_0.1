@@ -1018,6 +1018,9 @@ async function parseGPSExcelFileOptimized(filePath) {
 
 async function createRouteOptimized(gpsPoints, routeEntry, userId, terrainType) {
   const routeDetails = calculateRouteDetailsOptimized(gpsPoints, routeEntry);
+const highwayDetectionService = require('../services/highwayDetectionService');
+  const highwayResults = await highwayDetectionService.detectHighwaysAlongRoute(gpsPoints);
+  const majorHighways = highwayResults.majorHighways || [];
 
   const route = new Route({
     userId,
@@ -1034,6 +1037,7 @@ async function createRouteOptimized(gpsPoints, routeEntry, userId, terrainType) 
     estimatedDuration: routeDetails.estimatedDuration,
     routePoints: routeDetails.routePoints,
     terrain: terrainType,
+    majorHighways: majorHighways,
     metadata: {
       uploadSource: 'gps_csv',
       gpsTrackingPoints: gpsPoints.length,
