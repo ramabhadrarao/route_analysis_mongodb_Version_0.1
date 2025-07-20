@@ -117,22 +117,22 @@ try {
 }
 
 // PDF generation routes
-try {
-  const pdfRoutes = require('./routes/pdfGeneration');
-  app.use('/api/pdf', pdfRoutes);
-  console.log('✅ PDF generation routes loaded');
-} catch (error) {
-  console.error('❌ Error loading PDF routes:', error.message);
-}
+// try {
+//   const pdfRoutes = require('./routes/pdfGeneration');
+//   app.use('/api/pdf', pdfRoutes);
+//   console.log('✅ PDF generation routes loaded');
+// } catch (error) {
+//   console.error('❌ Error loading PDF routes:', error.message);
+// }
 
 // Dynamic reports routes
-try {
-  const dynamicReportsRoutes = require('./routes/dynamicReports');
-  app.use('/api/dynamic-reports', dynamicReportsRoutes);
-  console.log('✅ Dynamic reports routes loaded');
-} catch (error) {
-  console.error('❌ Error loading dynamic reports routes:', error.message);
-}
+// try {
+//   const dynamicReportsRoutes = require('./routes/dynamicReports');
+//   app.use('/api/dynamic-reports', dynamicReportsRoutes);
+//   console.log('✅ Dynamic reports routes loaded');
+// } catch (error) {
+//   console.error('❌ Error loading dynamic reports routes:', error.message);
+// }
 
 // ✅ CRITICAL: ADD BULK ROUTE PROCESSING ROUTES
 try {
@@ -143,7 +143,14 @@ try {
   console.error('❌ Error loading bulk route processing routes:', error.message);
   console.error('❌ Make sure ./routes/bulkRouteProcessor.js exists');
 }
-
+// Route Data Service (Comprehensive data from all collections)
+try {
+  const routeDataRoutes = require('./routes/routeData');
+  app.use('/api/route-data', routeDataRoutes);
+  console.log('✅ Route Data Service loaded');
+} catch (error) {
+  console.error('❌ Error loading route data routes:', error.message);
+}
 // Static file serving
 app.use('/downloads', express.static('downloads'));
 
