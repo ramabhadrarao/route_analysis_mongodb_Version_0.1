@@ -13,6 +13,7 @@ const Route = require('../models/Route');
 const XLSX = require('xlsx');
 
 const router = express.Router();
+const ecoSensitiveZoneService = require('../services/ecoSensitiveZoneService');
 
 // ============================================================================
 // OPTIMIZED CONFIGURATION FOR 5800 ROUTES
